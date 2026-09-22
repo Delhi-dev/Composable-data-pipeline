@@ -1,0 +1,31 @@
+# Message-level routing / environment checks.
+# Thresholds reference global settings, e.g. ${settings.thresholds.<key>}.
+
+meta:
+  stage: receipt-validation
+  rule_set: metadata_checks.yaml
+  version: 1
+  lifecycle: active
+  description: Message-level routing / environment checks.
+rules:
+- id: MD-001
+  description: Message not intended for this recipient jurisdiction
+  field: recipient_ok
+  op: eq
+  threshold: false
+  severity: 1.0
+  action: reject
+- id: MD-002
+  description: Duplicate message reference id
+  field: message_ref_duplicate
+  op: eq
+  threshold: true
+  severity: 0.8
+  action: hold
+- id: MD-003
+  description: Test data received in production
+  field: test_in_prod
+  op: eq
+  threshold: true
+  severity: 0.6
+  action: hold

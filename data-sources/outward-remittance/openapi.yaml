@@ -1,0 +1,59 @@
+openapi: 3.0.3
+info:
+  title: Outward Remittance & Withholding API
+  version: 0.1.0
+  description: Foreign remittances with transaction type and applied withholding rate.
+servers:
+- url: '{base_url}'
+  description: 'transport: api'
+paths:
+  /remittances:
+    get:
+      summary: Query Outward Remittance & Withholding
+      parameters:
+      - name: entity_key
+        in: query
+        schema:
+          type: string
+      - name: period
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OutwardRemittanceRow'
+components:
+  schemas:
+    OutwardRemittanceRow:
+      type: object
+      properties:
+        entity_key:
+          type: string
+          description: Domestic remitter entity id
+        period:
+          type: string
+          description: Filing period (YYYY-MM)
+        nature:
+          type: string
+          description: interest|royalty|technical_fee|management_fee|dividend|reimbursement|other
+        counterparty_juris:
+          type: string
+          description: ISO-3166 alpha-2 of the payee
+        gross_amount:
+          type: number
+          description: Gross remittance (base currency)
+        wht_rate_applied:
+          type: number
+          description: Withholding rate actually applied (decimal)
+        treaty_invoked:
+          type: string
+          description: DTAA article invoked, if any (nullable)
+        is_related_party:
+          type: boolean
+          description: Related-party flag

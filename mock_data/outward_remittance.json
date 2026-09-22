@@ -1,0 +1,12 @@
+[
+  {
+    "entity_key": "E001",
+    "period": "2022-07",
+    "nature": "interest",
+    "counterparty_juris": "MU",
+    "gross_amount": 500,
+    "wht_rate_applied": 0.05,
+    "treaty_invoked": "Art11",
+    "is_related_party": true
+  }
+]

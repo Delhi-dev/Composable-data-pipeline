@@ -1,0 +1,56 @@
+openapi: 3.0.3
+info:
+  title: Transfer-Pricing Return API
+  version: 0.1.0
+  description: Related-party transactions by category, direction and counterparty jurisdiction.
+servers:
+- url: '{base_url}'
+  description: 'transport: db_link'
+paths:
+  /related_txns:
+    get:
+      summary: Query Transfer-Pricing Return
+      parameters:
+      - name: entity_key
+        in: query
+        schema:
+          type: string
+      - name: period
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransferPricingReturnRow'
+components:
+  schemas:
+    TransferPricingReturnRow:
+      type: object
+      properties:
+        entity_key:
+          type: string
+          description: Domestic entity id
+        period:
+          type: integer
+          description: Assessment / financial year
+        category:
+          type: string
+          description: tangible_goods|services_fees|royalties|interest|dividends|reimbursements|other
+        direction:
+          type: string
+          description: inbound | outbound
+        counterparty_juris:
+          type: string
+          description: ISO-3166 alpha-2 of the related party
+        amount:
+          type: number
+          description: Transaction value (base currency)
+        is_related_party:
+          type: boolean
+          description: Related-party flag

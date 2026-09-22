@@ -1,0 +1,48 @@
+openapi: 3.0.3
+info:
+  title: Case Management (downstream sink) API
+  version: 0.1.0
+  description: Receives approved candidate cases. Payload carries INTERNAL evidence only.
+servers:
+- url: '{base_url}'
+  description: 'transport: api'
+paths:
+  /audit-cases:
+    post:
+      summary: Create a Case Management (downstream sink) record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseManagementRow'
+      responses:
+        '201':
+          description: Created
+components:
+  schemas:
+    CaseManagementRow:
+      type: object
+      properties:
+        entity_key:
+          type: string
+          description: Domestic entity id
+        period:
+          type: integer
+          description: Year under review
+        api_score:
+          type: number
+          description: Composite Audit Potential Index [0..1]
+        reason_codes:
+          type: array
+          description: Explainable reason codes
+          items:
+            type: string
+        evidence_pointers:
+          type: array
+          description: Pointers to INTERNAL records only (no raw CbCR)
+          items:
+            type: string
+        selected:
+          type: boolean
+          description: Selected for audit

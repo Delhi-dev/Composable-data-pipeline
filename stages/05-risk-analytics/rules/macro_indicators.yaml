@@ -1,0 +1,38 @@
+# Jurisdiction-level CbCR macro flags.
+# Thresholds reference global settings, e.g. ${settings.thresholds.<key>}.
+
+meta:
+  stage: risk-analytics
+  rule_set: macro_indicators.yaml
+  version: 1
+  lifecycle: active
+  description: Jurisdiction-level CbCR macro flags.
+rules:
+- id: MX-001
+  description: Low-substance high-profit hub
+  field: profit_per_employee_pctile_rank
+  op: gte
+  threshold: ${settings.thresholds.profit_per_employee_pctile}
+  severity: 0.7
+  action: flag
+- id: MX-002
+  description: Low effective tax rate hub
+  field: etr
+  op: lte
+  threshold: ${settings.thresholds.low_etr_cutoff}
+  severity: 0.7
+  action: flag
+- id: MX-003
+  description: Related-party revenue concentration
+  field: rpt_revenue_share
+  op: gte
+  threshold: ${settings.thresholds.related_party_revenue_share}
+  severity: 0.6
+  action: flag
+- id: MX-004
+  description: High return on tiny stated capital
+  field: roe
+  op: gte
+  threshold: ${settings.thresholds.roe_high_cutoff}
+  severity: 0.5
+  action: flag

@@ -1,0 +1,29 @@
+# Global settings — single source of truth for environment-level configuration.
+# Rules reference values here (and in thresholds.yaml) as ${settings.<dotted.path>}.
+config_version: "0.1.0"
+effective_date: "2025-04-01"
+environment: "dev"            # dev | test | prod
+
+jurisdiction:
+  code: "IN"                  # primary instance (India). Swap to "NG" for Nigeria.
+  entity_id_scheme: "PAN"     # PAN (India) | TIN (Nigeria)
+  base_currency: "INR"        # INR | NGN
+
+fx_policy:
+  method: "year_end"          # year_end | annual_average
+  rate_source: "reference_rate"
+  store_rate_with_value: true
+
+# OECD Appropriate-Use — enforced across every stage.
+appropriate_use:
+  permitted_purposes: [tp_risk_assessment, beps_risk_assessment, econ_stat]
+  cbcr_isolation:
+    raw_cbcr_leaves_enclave: false
+    export_flags_only: true
+    flag_has_monetary_field: false
+  require_human_review_before_case: true
+
+references:
+  thresholds: "config/thresholds.yaml"
+  data_source_endpoints: "config/data_source_endpoints.yaml"
+  rule_registry: "config/rule_registry.yaml"

@@ -1,0 +1,5 @@
+# Risk-country list for the debt-shifting typology. Effective-dated; edit freely.
+list_id: debt_shifting.conduit_jurisdictions
+description: "Low-tax / conduit jurisdictions associated with interest stripping"
+effective_from: "2025-04-01"
+members: [MU, NL, CY, SG, AE]

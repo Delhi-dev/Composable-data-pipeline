@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CbCR Workbench · WIP</title>
+  <link rel="stylesheet" href="/assets/niche.css">
+  <link rel="stylesheet" href="/assets/wip-workbench.css">
+</head>
+<body class="wip">
+  <script>
+    if (new URLSearchParams(window.location.search).get("ui") === "polished") {
+      document.body.classList.remove("wip");
+      document.title = "Niche · CbCR Operations";
+    }
+  </script>
+  <header class="masthead">
+    <a class="brand" href="#work" aria-label="CbCR workbench home"><span class="brand-mark" aria-hidden="true">N</span><span><strong id="appTitle">CBCR WORKBENCH</strong><small id="appSubtitle">WIP CONTROL CONSOLE</small></span></a>
+    <div class="system-status" id="systemStatus">CONNECTING</div>
+    <label class="actor-control">Acting as <select id="actor"><option value="demo">demo</option><option value="auditor">auditor</option></select></label>
+    <a class="docs-link" href="/docs" target="_blank" rel="noreferrer">API CONTROL PLANE ↗</a>
+    <a class="docs-link wip-only" href="/?ui=polished">POLISHED UI ↗</a>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Application navigation">
+      <nav id="navigation">
+        <button data-view="work" class="active"><span>01</span> Work queue</button>
+        <button data-view="lifecycle"><span>02</span> Data lifecycle</button>
+        <button data-view="workspace"><span>03</span> Dataset workspace</button>
+        <button data-view="runs"><span>04</span> Run history</button>
+        <button data-view="cases"><span>05</span> Case workbench</button>
+        <button data-view="governance"><span>06</span> Lineage &amp; audit</button>
+        <button data-view="catalogue"><span>07</span> Function catalogue</button>
+        <button data-view="admin"><span>08</span> Administration</button>
+      </nav>
+      <div class="sidebar-note"><span class="stamp">ASYNC</span><p>Every action is bound to an immutable dataset snapshot.</p></div>
+    </aside>
+    <main>
+      <section id="work" class="view active">
+        <div class="title-row"><div><p class="kicker">Niche control plane</p><h1>Make the next governed move.</h1><p class="lede">Choose a dataset, run only the controls you need, then review evidence before publication or case action.</p></div><button class="command" data-action="open-intake">+ INTAKE LOT</button></div>
+        <div id="healthPanel" class="health-panel"></div>
+        <div class="queue-grid" id="workQueue"></div>
+        <section class="panel recent-panel"><div class="panel-head"><div><p class="kicker">Recent activity</p><h2>Runs requiring attention</h2></div><button class="text-button" data-nav="runs">VIEW HISTORY →</button></div><div id="recentRuns" class="compact-list"></div></section>
+      </section>
+
+      <section id="lifecycle" class="view">
+        <div class="title-row"><div><p class="kicker">Governed snapshots</p><h1>Data lifecycle</h1><p class="lede">Create a new lot or follow an existing lot from intake to risk-ready analysis.</p></div><button class="command" data-action="open-intake">+ INTAKE LOT</button></div>
+        <section class="panel filters"><label>Lot <select id="lotFilter"><option value="">All lots</option></select></label><label>Zone <select id="zoneFilter"><option value="">All zones</option><option>landing</option><option>canonical</option><option>dq_passed</option><option>enriched</option><option>risk_ready</option></select></label><button class="secondary" data-action="refresh-lifecycle">REFRESH</button></section>
+        <div id="lifecycleList" class="lot-list"></div>
+      </section>
+
+      <section id="workspace" class="view">
+        <div id="workspaceEmpty" class="empty-workspace"><p class="kicker">Dataset workspace</p><h1>Select a dataset</h1><p>Open any dataset from Data lifecycle to inspect its data, run functions, review evidence and publish its permitted next stage.</p><button class="command" data-nav="lifecycle">OPEN LIFECYCLE</button></div>
+        <div id="workspaceContent" hidden>
+          <div class="dataset-banner" id="datasetBanner"></div>
+          <div class="workspace-tabs" id="workspaceTabs"><button class="active" data-tab="overview">Overview</button><button data-tab="data">Data</button><button data-tab="functions">Run functions</button><button data-tab="results">Results</button><button data-tab="publish">Publish / enrich</button><button data-tab="lineage">Governance</button></div>
+          <section id="tab-overview" class="workspace-tab active"><div id="overviewContent"></div></section>
+          <section id="tab-data" class="workspace-tab"><div id="dataContent"></div></section>
+          <section id="tab-functions" class="workspace-tab"><div id="functionsContent"></div></section>
+          <section id="tab-results" class="workspace-tab"><div id="resultsContent"></div></section>
+          <section id="tab-publish" class="workspace-tab"><div id="publishContent"></div></section>
+          <section id="tab-lineage" class="workspace-tab"><div id="lineageContent"></div></section>
+        </div>
+      </section>
+
+      <section id="runs" class="view"><div class="title-row"><div><p class="kicker">Archive, not deletion</p><h1>Run history</h1><p class="lede">Search completed, failed and active analytical work without crowding the workspace.</p></div><button class="secondary" data-action="refresh-runs">REFRESH</button></div><section class="panel filters"><label>Status <select id="runStatus"><option value="">All statuses</option><option>queued</option><option>running</option><option>completed</option><option>failed</option></select></label><label>Purpose <select id="runPurpose"><option value="">All purposes</option><option value="data_quality">Data quality</option><option value="risk_assessment">Risk assessment</option><option value="case_review">Case review</option></select></label></section><div id="runHistory" class="run-table"></div><div id="runInspector"></div></section>
+
+      <section id="cases" class="view"><div class="title-row"><div><p class="kicker">Human review queue</p><h1>Case workbench</h1><p class="lede">Risk signals become reviewable candidates; a case decision is never an automatic compliance conclusion.</p></div><button class="secondary" data-action="refresh-cases">REFRESH</button></div><div class="two-column"><section class="panel"><div class="panel-head"><h2>Selection batches</h2></div><div id="batchList" class="compact-list"></div></section><section class="panel"><div class="panel-head"><h2>Candidate evidence</h2></div><div id="candidateList" class="empty-note">Select a batch to see candidates.</div></section></div></section>
+
+      <section id="governance" class="view"><div class="title-row"><div><p class="kicker">Traceability</p><h1>Lineage &amp; audit</h1><p class="lede">Lineage tracks data movement. Audit tracks whether a user action was allowed or denied.</p></div><button class="secondary" data-action="load-audit">LOAD AUDIT</button></div><div class="two-column"><section class="panel"><div class="panel-head"><h2>Selected dataset lineage</h2></div><div id="governanceLineage" class="empty-note">Open a dataset workspace to load its lineage.</div></section><section class="panel"><div class="panel-head"><h2>Access and action audit</h2></div><div id="auditList" class="empty-note">Auditor role required to view audit events.</div></section></div></section>
+
+      <section id="catalogue" class="view"><div class="title-row"><div><p class="kicker">Configured controls</p><h1>Function catalogue</h1><p class="lede">Functions are activated independently and become available only at permitted stages and purposes.</p></div><button class="secondary" data-action="refresh-catalogue">REFRESH</button></div><div id="catalogueList" class="catalogue-grid"></div></section>
+
+      <section id="admin" class="view"><div class="title-row"><div><p class="kicker">Configuration boundary</p><h1>Administration</h1><p class="lede">Source links, pipeline profiles, mappings and roles remain behind permission-controlled APIs.</p></div></div><div class="two-column"><section class="panel"><div class="panel-head"><h2>Connected sources</h2></div><div id="sourceList" class="compact-list"></div></section><section class="panel"><div class="panel-head"><h2>Users and roles</h2></div><div id="userList" class="compact-list"></div></section></div><section class="panel profile-panel"><div class="panel-head"><h2>Pipeline profiles</h2></div><div id="profileList" class="profile-list"></div></section></section>
+    </main>
+  </div>
+  <dialog id="intakeDialog"><form method="dialog" id="intakeForm"><div class="dialog-head"><div><p class="kicker">Create governed snapshots</p><h2>Intake lot</h2></div><button value="cancel" class="icon-button" aria-label="Close">×</button></div><label>Source<select id="intakeSource" required></select></label><label>Pipeline profile<select id="intakeProfile" required></select></label><label>External lot reference<input id="intakeReference" placeholder="demo-20260821-01"></label><label>Report subset <input id="intakeReportIds" placeholder="All reports, or comma-separated IDs"></label><label>Intake note<textarea id="intakeNote" rows="3" placeholder="Purpose or operator note"></textarea></label><div class="dialog-actions"><button value="cancel" class="secondary">CANCEL</button><button value="default" class="command">CREATE LOT</button></div></form></dialog>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="/assets/niche.js"></script>
+  <script>
+    if (new URLSearchParams(window.location.search).get("ui") === "polished") {
+      document.getElementById("appTitle").textContent = "Niche";
+      document.getElementById("appSubtitle").textContent = "CBCR OPERATIONS";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+# Two RBAC realms: the CbCR enclave is separate from the internal zone.
+
+realms:
+  cbcr_enclave:
+    roles:
+    - technical_exchange_operator
+    - cbcr_data_engineer
+    - risk_analyst_enclave
+    access: raw CbCR (enclave only)
+  internal_zone:
+    roles:
+    - data_steward
+    - risk_analyst
+    - risk_review_manager
+    - auditor
+    - statistical_analyst
+    - aup_assurance_officer
+    access: derived flags, domestic data, case packs (per purpose)
+principles:
+- least privilege
+- purpose-based access selection
+- segregation of duties
+- periodic recertification

@@ -1,0 +1,18 @@
+# Convert to base currency per policy (settings).
+# Thresholds reference global settings, e.g. ${settings.thresholds.<key>}.
+
+meta:
+  stage: canonicalisation
+  rule_set: currency_conversion.yaml
+  version: 1
+  lifecycle: active
+  description: Convert to base currency per policy (settings).
+rules:
+- id: CC-001
+  description: Convert reported currency to base currency
+  field: currency
+  op: ne
+  threshold: ${settings.jurisdiction.base_currency}
+  severity: 0.0
+  action: convert
+  note: rate per ${settings.fx_policy.method}; store rate+date with value

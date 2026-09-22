@@ -1,0 +1,31 @@
+# Transport / integrity failures (block).
+# Thresholds reference global settings, e.g. ${settings.thresholds.<key>}.
+
+meta:
+  stage: receipt-validation
+  rule_set: file_level_checks.yaml
+  version: 1
+  lifecycle: active
+  description: Transport / integrity failures (block).
+rules:
+- id: FL-001
+  description: Download failed
+  field: download_ok
+  op: eq
+  threshold: false
+  severity: 1.0
+  action: reject
+- id: FL-002
+  description: Decryption failed
+  field: decrypt_ok
+  op: eq
+  threshold: false
+  severity: 1.0
+  action: reject
+- id: FL-003
+  description: Schema validation failed
+  field: schema_valid
+  op: eq
+  threshold: false
+  severity: 1.0
+  action: reject

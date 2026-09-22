@@ -1,0 +1,56 @@
+openapi: 3.0.3
+info:
+  title: Corporate Income-Tax Return API
+  version: 0.1.0
+  description: 'Local macro-financials: turnover, EBITDA and itemised deductions.'
+servers:
+- url: '{base_url}'
+  description: 'transport: db_link'
+paths:
+  /returns:
+    get:
+      summary: Query Corporate Income-Tax Return
+      parameters:
+      - name: entity_key
+        in: query
+        schema:
+          type: string
+      - name: period
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CorporateReturnRow'
+components:
+  schemas:
+    CorporateReturnRow:
+      type: object
+      properties:
+        entity_key:
+          type: string
+          description: Domestic entity id
+        period:
+          type: integer
+          description: Assessment / financial year
+        total_turnover:
+          type: number
+          description: Total turnover (base currency)
+        ebitda:
+          type: number
+          description: Earnings before interest, tax, dep. & amort.
+        interest_deducted:
+          type: number
+          description: Interest claimed as deduction
+        royalty_deducted:
+          type: number
+          description: Royalty / intangible fees deducted
+        allowable_deductions:
+          type: object
+          description: Itemised deductions (mgmt/technical/finance)

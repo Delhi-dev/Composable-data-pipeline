@@ -1,0 +1,18 @@
+# Explainable reason templates.
+# Thresholds reference global settings, e.g. ${settings.thresholds.<key>}.
+
+meta:
+  stage: case-selection
+  rule_set: reason_codes.yaml
+  version: 1
+  lifecycle: active
+  description: Explainable reason templates.
+rules:
+- id: RC-DEBT-001
+  typology: debt_shifting
+  template: 'High debt-shifting risk to {implicated_juris}: CbCR substance/ETR mismatch cross-matched
+    with interest remittance and thin local equity.'
+- id: RC-SVC-001
+  typology: services_royalty
+  template: 'Service-fee/royalty erosion to {implicated_juris}: CbCR substance/RPT mismatch cross-matched
+    with service/royalty remittances and intangible-cap breach.'

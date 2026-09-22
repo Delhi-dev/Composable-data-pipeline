@@ -1,0 +1,53 @@
+openapi: 3.0.3
+info:
+  title: Audited Financial Statements API
+  version: 0.1.0
+  description: Balance-sheet leverage data for thin-capitalisation analysis.
+servers:
+- url: '{base_url}'
+  description: 'transport: api'
+paths:
+  /financials:
+    get:
+      summary: Query Audited Financial Statements
+      parameters:
+      - name: entity_key
+        in: query
+        schema:
+          type: string
+      - name: period
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditedFinancialsRow'
+components:
+  schemas:
+    AuditedFinancialsRow:
+      type: object
+      properties:
+        entity_key:
+          type: string
+          description: Domestic entity id
+        period:
+          type: integer
+          description: Financial year
+        total_debt_lt:
+          type: number
+          description: Long-term liabilities (debt)
+        total_equity:
+          type: number
+          description: Total equity
+        stated_capital:
+          type: number
+          description: Stated / paid-up capital
+        related_party_notes:
+          type: string
+          description: 'Qualitative notes: intra-group loan terms'

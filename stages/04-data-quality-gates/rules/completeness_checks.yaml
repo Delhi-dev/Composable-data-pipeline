@@ -1,0 +1,29 @@
+# Presence of mandatory sections (block).
+# Thresholds reference global settings, e.g. ${settings.thresholds.<key>}.
+
+meta:
+  stage: data-quality-gates
+  rule_set: completeness_checks.yaml
+  version: 1
+  lifecycle: active
+  description: Presence of mandatory sections (block).
+rules:
+- id: DQ-001
+  description: "Missing reporting-entity name \u2192 exclude"
+  field: reporting_entity_name
+  op: missing
+  severity: 1.0
+  action: block
+- id: DQ-002
+  description: "Missing CbC body \u2192 exclude"
+  field: cbc_body_present
+  op: eq
+  threshold: false
+  severity: 1.0
+  action: block
+- id: DQ-003
+  description: Constituent entity without business activity
+  field: business_activity
+  op: missing
+  severity: 0.4
+  action: warn

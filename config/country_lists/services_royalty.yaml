@@ -1,0 +1,5 @@
+# Risk-country list for the service-fee / royalty typology. Effective-dated.
+list_id: services_royalty.ip_low_tax_hubs
+description: "Hubs used for service-fee / royalty base erosion"
+effective_from: "2025-04-01"
+members: [MU, NL, IE, LU, AE]

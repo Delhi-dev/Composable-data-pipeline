@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  title: "Stage 05 \u2014 Risk Analytics (CbCR macro + typology plugins) Service"
+  version: 0.1.0
+  description: "Compute CbCR macro-indicators and run configurable typology plugins to emit risk flags.\
+    \ ENCLAVE stage \u2014 exports flags only, purpose-tagged, no monetary field."
+paths:
+  /run:
+    post:
+      summary: Execute this stage on a period / batch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                period:
+                  type: string
+                batch_id:
+                  type: string
+      responses:
+        '202':
+          description: Accepted; produces the stage artifact
+  /result:
+    get:
+      summary: Fetch this stage's produced artifact
+      parameters:
+      - name: batch_id
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: CbCRRiskFlag[] (flags only)

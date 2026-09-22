@@ -1,0 +1,14 @@
+# Which rule sets / engines / plugins are active, their version and lifecycle.
+stages:
+  "01-receipt-validation":   {engine: validation_engine, rules: [file_level_checks, metadata_checks, record_level_checks], version: 1, lifecycle: active}
+  "02-canonicalisation":     {engine: canonicalisation_engine, rules: [correction_deletion_rules, currency_conversion], version: 1, lifecycle: active}
+  "03-entity-resolution":    {engine: entity_resolution_engine, rules: [match_hierarchy, confidence_thresholds], version: 1, lifecycle: active}
+  "04-data-quality-gates":   {engine: dq_engine, rules: [completeness_checks, ratio_checks], version: 1, lifecycle: active}
+  "05-risk-analytics":       {engine: risk_engine, rules: [macro_indicators], version: 1, lifecycle: active}
+  "06-cross-match-scoring":  {engine: crossmatch_engine, rules: [correlation_rules, scoring], version: 1, lifecycle: active}
+  "07-case-selection":       {engine: selection_engine, rules: [selection_rules, reason_codes, aup_guardrails], version: 1, lifecycle: active}
+
+typology_plugins:
+  - {id: debt_shifting,    version: 1, lifecycle: active, module: stages/05-risk-analytics/plugins/debt_shifting.py}
+  - {id: services_royalty, version: 1, lifecycle: active, module: stages/05-risk-analytics/plugins/services_royalty.py}
+  # add new methods here (shadow first): royalty_migration, commodity_reinvoicing, captive_reinsurance ...

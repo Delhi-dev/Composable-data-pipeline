@@ -1,0 +1,48 @@
+# Registry of data-source APIs. Engines discover sources here — never hard-coded URLs.
+# transport: api (REST) | db_link (read-only view) | sftp (file drop)
+
+sources:
+  cbcr_store:
+    transport: api
+    base_url: https://enclave.internal/cbcr_store/v1
+    openapi: data-sources/cbcr-store/openapi.yaml
+    auth: mtls
+    isolation: enclave
+    form_ref: OECD CbCR XML
+  domestic_taxpayer_registry:
+    transport: api
+    base_url: https://internal/domestic_taxpayer_registry/v1
+    openapi: data-sources/domestic-taxpayer-registry/openapi.yaml
+    auth: oauth2
+    form_ref: Registry master
+  transfer_pricing_return:
+    transport: db_link
+    base_url: https://internal/transfer_pricing_return/v1
+    openapi: data-sources/transfer-pricing-return/openapi.yaml
+    auth: oauth2
+    form_ref: Form 3CEB | TPDF
+  outward_remittance:
+    transport: api
+    base_url: https://internal/outward_remittance/v1
+    openapi: data-sources/outward-remittance/openapi.yaml
+    auth: oauth2
+    form_ref: Forms 15CA-15CB | WHT return
+  corporate_return:
+    transport: db_link
+    base_url: https://internal/corporate_return/v1
+    openapi: data-sources/corporate-return/openapi.yaml
+    auth: oauth2
+    form_ref: ITR | CIT-001
+  audited_financials:
+    transport: api
+    base_url: https://internal/audited_financials/v1
+    openapi: data-sources/audited-financials/openapi.yaml
+    auth: oauth2
+    form_ref: IFRS accounts
+  case_management:
+    transport: api
+    base_url: https://internal/case_management/v1
+    openapi: data-sources/case-management/openapi.yaml
+    auth: oauth2
+    form_ref: Case pack
+    direction: sink

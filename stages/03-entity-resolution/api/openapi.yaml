@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  title: "Stage 03 \u2014 Entity Resolution & Domestic Linkage Service"
+  version: 0.1.0
+  description: Resolve each constituent entity to a domestic taxpayer with a confidence score, and link
+    the group to domestic filings on stable keys.
+paths:
+  /run:
+    post:
+      summary: Execute this stage on a period / batch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                period:
+                  type: string
+                batch_id:
+                  type: string
+      responses:
+        '202':
+          description: Accepted; produces the stage artifact
+  /result:
+    get:
+      summary: Fetch this stage's produced artifact
+      parameters:
+      - name: batch_id
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Resolved entities + domestic links (with confidence)

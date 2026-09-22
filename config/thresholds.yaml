@@ -1,0 +1,39 @@
+# All tunable thresholds, caps and rates ("global variables").
+# Edit here — rules reference these by key as ${settings.thresholds.<key>} etc.
+thresholds:
+  # --- Data quality / CbCR macro indicators ---
+  profit_per_employee_pctile: 0.90
+  revenue_per_employee_pctile: 0.90
+  related_party_revenue_share: 0.75
+  low_etr_cutoff: 0.10
+  roe_high_cutoff: 0.50
+  # --- Typology: debt shifting / thin capitalisation ---
+  debt_to_equity_thin_cap: 3.0
+  interest_ebitda_cap: 0.30
+  # --- Typology: services & royalty ---
+  royalty_ebitda_cap: 0.05
+  # --- Treaty / withholding ---
+  wht_rate_gap: 0.05
+  # --- Case selection ---
+  api_cutoff: 0.80
+  top_n: 200
+  materiality_threshold: 10000000   # base currency
+
+rate_tables:
+  standard_wht: {interest: 0.20, royalty: 0.10, technical_fee: 0.10}
+  statutory_cit_rate: 0.30
+
+scoring_weights:
+  debt_shifting:
+    interest_out_to_risk_juris: 0.35
+    thin_cap_ratio: 0.25
+    interest_ebitda_breach: 0.20
+    wht_treaty_strip: 0.20
+  services_royalty:
+    service_fee_out_to_risk_juris: 0.40
+    royalty_ebitda_breach: 0.25
+    rpt_concentration: 0.20
+    wht_treaty_strip: 0.15
+  composite:
+    method: weighted_max          # weighted_max | weighted_sum | noisy_or
+    typology_weights: {debt_shifting: 0.5, services_royalty: 0.5}

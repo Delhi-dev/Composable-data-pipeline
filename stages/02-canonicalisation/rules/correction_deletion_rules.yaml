@@ -1,0 +1,31 @@
+# Latest-valid-version resolution.
+# Thresholds reference global settings, e.g. ${settings.thresholds.<key>}.
+
+meta:
+  stage: canonicalisation
+  rule_set: correction_deletion_rules.yaml
+  version: 1
+  lifecycle: active
+  description: Latest-valid-version resolution.
+rules:
+- id: CD-001
+  description: New record establishes an original version
+  field: record_type
+  op: eq
+  threshold: new
+  severity: 0.0
+  action: accept_original
+- id: CD-002
+  description: Correction replaces the matched original
+  field: record_type
+  op: eq
+  threshold: correction
+  severity: 0.0
+  action: replace
+- id: CD-003
+  description: Deletion invalidates the matched record
+  field: record_type
+  op: eq
+  threshold: deletion
+  severity: 0.0
+  action: invalidate

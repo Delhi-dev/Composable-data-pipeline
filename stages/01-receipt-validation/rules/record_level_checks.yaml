@@ -1,0 +1,24 @@
+# Correction / deletion reference integrity.
+# Thresholds reference global settings, e.g. ${settings.thresholds.<key>}.
+
+meta:
+  stage: receipt-validation
+  rule_set: record_level_checks.yaml
+  version: 1
+  lifecycle: active
+  description: Correction / deletion reference integrity.
+rules:
+- id: RL-001
+  description: Duplicate document reference id
+  field: doc_ref_duplicate
+  op: eq
+  threshold: true
+  severity: 0.7
+  action: quarantine
+- id: RL-002
+  description: Correction refers to unknown record
+  field: unknown_correction_ref
+  op: eq
+  threshold: true
+  severity: 0.7
+  action: quarantine

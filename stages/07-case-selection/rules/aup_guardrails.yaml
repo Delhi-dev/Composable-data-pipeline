@@ -1,0 +1,22 @@
+# Hard Appropriate-Use gates (must pass).
+# Thresholds reference global settings, e.g. ${settings.thresholds.<key>}.
+
+meta:
+  stage: case-selection
+  rule_set: aup_guardrails.yaml
+  version: 1
+  lifecycle: active
+  description: Hard Appropriate-Use gates (must pass).
+rules:
+- id: AUP-001
+  description: Payload must not contain any raw CbCR value
+  check: no_raw_cbcr_in_payload
+  action: block_on_fail
+- id: AUP-002
+  description: Evidence pointers reference internal sources only
+  check: evidence_internal_only
+  action: block_on_fail
+- id: AUP-003
+  description: No monetary-adjustment / tax-demand field anywhere
+  check: no_adjustment_field
+  action: block_on_fail

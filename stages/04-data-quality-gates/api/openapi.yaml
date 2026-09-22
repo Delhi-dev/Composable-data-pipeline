@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  title: "Stage 04 \u2014 Data-Quality Gates & Analytical Pool Service"
+  version: 0.1.0
+  description: Classify records (block / quarantine / warn / outlier / info) and assemble the analytical
+    data pool that risk analytics runs on.
+paths:
+  /run:
+    post:
+      summary: Execute this stage on a period / batch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                period:
+                  type: string
+                batch_id:
+                  type: string
+      responses:
+        '202':
+          description: Accepted; produces the stage artifact
+  /result:
+    get:
+      summary: Fetch this stage's produced artifact
+      parameters:
+      - name: batch_id
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Analytical data pool with DQ flags

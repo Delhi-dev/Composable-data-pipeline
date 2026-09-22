@@ -1,0 +1,32 @@
+# Per-typology gating: CbCR flag on J must co-occur with a domestic indicator on J.
+# Thresholds reference global settings, e.g. ${settings.thresholds.<key>}.
+
+meta:
+  stage: cross-match-scoring
+  rule_set: correlation_rules.yaml
+  version: 1
+  lifecycle: active
+  description: 'Per-typology gating: CbCR flag on J must co-occur with a domestic indicator on J.'
+rules:
+- id: XM-DEBT
+  typology: debt_shifting
+  requires_cbcr:
+  - MX-001
+  - MX-002
+  domestic_indicators:
+  - interest_out_to_risk_juris
+  - thin_cap_ratio
+  - interest_ebitda_breach
+  - wht_treaty_strip
+  gate: cbcr_flag_on_J AND any(domestic_interest_indicator_on_J)
+- id: XM-SVC
+  typology: services_royalty
+  requires_cbcr:
+  - MX-001
+  - MX-003
+  domestic_indicators:
+  - service_fee_out_to_risk_juris
+  - royalty_ebitda_breach
+  - rpt_concentration
+  - wht_treaty_strip
+  gate: cbcr_flag_on_J AND any(domestic_service_indicator_on_J)

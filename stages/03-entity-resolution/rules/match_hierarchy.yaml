@@ -1,0 +1,34 @@
+# Ordered match strategies, best first.
+# Thresholds reference global settings, e.g. ${settings.thresholds.<key>}.
+
+meta:
+  stage: entity-resolution
+  rule_set: match_hierarchy.yaml
+  version: 1
+  lifecycle: active
+  description: Ordered match strategies, best first.
+rules:
+- id: ER-001
+  description: Exact valid domestic id reported in the id field
+  match: exact_id
+  confidence: 1.0
+- id: ER-002
+  description: Valid id extracted from a larger/malformed string
+  match: extracted_id
+  confidence: 0.9
+- id: ER-003
+  description: Name+address match to taxpayer registry
+  match: name_address
+  confidence: 0.75
+- id: ER-004
+  description: Match via domestic TP / master-file filing
+  match: filing_match
+  confidence: 0.7
+- id: ER-005
+  description: Manual confirmation by data steward
+  match: manual
+  confidence: 1.0
+- id: ER-006
+  description: "Unmatched \u2014 insufficient evidence"
+  match: none
+  confidence: 0.0

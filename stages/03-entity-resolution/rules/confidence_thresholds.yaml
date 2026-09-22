@@ -1,0 +1,22 @@
+# Routing by confidence.
+# Thresholds reference global settings, e.g. ${settings.thresholds.<key>}.
+
+meta:
+  stage: entity-resolution
+  rule_set: confidence_thresholds.yaml
+  version: 1
+  lifecycle: active
+  description: Routing by confidence.
+rules:
+- id: CF-001
+  description: Auto-accept high-confidence match
+  field: confidence
+  op: gte
+  threshold: 0.9
+  action: accept
+- id: CF-002
+  description: Route medium-confidence to review queue
+  field: confidence
+  op: lt
+  threshold: 0.9
+  action: review

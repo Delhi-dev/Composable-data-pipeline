@@ -1,0 +1,53 @@
+openapi: 3.0.3
+info:
+  title: Domestic Taxpayer Registry API
+  version: 0.1.0
+  description: Authoritative domestic taxpayer master used to resolve constituent entities.
+servers:
+- url: '{base_url}'
+  description: 'transport: api'
+paths:
+  /taxpayers:
+    get:
+      summary: Query Domestic Taxpayer Registry
+      parameters:
+      - name: entity_key
+        in: query
+        schema:
+          type: string
+      - name: period
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DomesticTaxpayerRegistryRow'
+components:
+  schemas:
+    DomesticTaxpayerRegistryRow:
+      type: object
+      properties:
+        entity_key:
+          type: string
+          description: Canonical internal entity id
+        local_tax_id:
+          type: string
+          description: Domestic taxpayer id (PAN / TIN)
+        group_key:
+          type: string
+          description: Linked MNE group id
+        name:
+          type: string
+          description: Registered legal name
+        jurisdiction:
+          type: string
+          description: ISO-3166 alpha-2
+        status:
+          type: string
+          description: active | dormant | struck-off

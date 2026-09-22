@@ -1,0 +1,20 @@
+{
+  "records": [
+    {
+      "submission": {"uid": "RPT-2025-001", "msg_ref": "IN-CBCR-2025-001"},
+      "mne": {
+        "reporting_unit": {"identifier": "MNE-ASTER", "label": "Aster Global Group"},
+        "members": [
+          {"member_key": "ENT-IN-01", "caption": "Aster India Pvt Ltd", "residence": "IN", "identifier": "AAECA1234F", "capacity": "constituent"},
+          {"member_key": "ENT-NL-01", "caption": "Aster IP BV", "residence": "NL", "identifier": null, "capacity": "constituent"}
+        ]
+      },
+      "fiscal": {"closing_date": "2025-12-31", "unit": "EUR"},
+      "exchange": {"destination": "IN"},
+      "tabulations": [
+        {"iso": "IN", "amounts": {"revenue_all": "120000000", "profit": "12000000", "cash_tax": "2800000", "tax_expense": "3000000", "fixed_assets": "54000000", "revenue_related": "30000000", "revenue_unrelated": "90000000"}, "counts": {"staff": 820}},
+        {"iso": "NL", "amounts": {"revenue_all": "50000000", "profit": "30000000", "cash_tax": "250000", "tax_expense": "300000", "fixed_assets": "1000000", "revenue_related": "47000000", "revenue_unrelated": "3000000"}, "counts": {"staff": 1}}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,88 @@
+openapi: 3.0.3
+info:
+  title: CbCR Store (isolated enclave) API
+  version: 0.1.0
+  description: 'Inbound Country-by-Country reports, per-jurisdiction rows. ENCLAVE source: raw values
+    never leave; only derived, purpose-tagged risk flags are exported.'
+servers:
+- url: '{base_url}'
+  description: 'transport: api'
+paths:
+  /records:
+    get:
+      summary: Query CbCR Store (isolated enclave)
+      parameters:
+      - name: group_key
+        in: query
+        schema:
+          type: string
+      - name: period
+        in: query
+        schema:
+          type: string
+      - name: purpose
+        in: query
+        required: true
+        description: One of the OECD permitted purposes (enclave only).
+        schema:
+          type: string
+          enum:
+          - tp_risk_assessment
+          - beps_risk_assessment
+          - econ_stat
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CbcrStoreRow'
+components:
+  schemas:
+    CbcrStoreRow:
+      type: object
+      properties:
+        group_key:
+          type: string
+          description: Canonical MNE group identifier
+        reporting_period:
+          type: integer
+          description: Reporting fiscal year
+        source_set_id:
+          type: string
+          description: Single-source-consistency key (Pillar Two safe harbour)
+        jurisdiction:
+          type: string
+          description: ISO-3166 alpha-2 of the tax jurisdiction
+        revenue_related:
+          type: number
+          description: Revenue from related parties
+        revenue_unrelated:
+          type: number
+          description: Revenue from unrelated parties
+        revenue_total:
+          type: number
+          description: Total revenue
+        profit_before_tax:
+          type: number
+          description: Profit (loss) before income tax
+        tax_paid:
+          type: number
+          description: Income tax paid (cash)
+        tax_accrued:
+          type: number
+          description: Income tax accrued (current year)
+        stated_capital:
+          type: number
+          description: Stated capital
+        accumulated_earnings:
+          type: number
+          description: Accumulated earnings
+        employees:
+          type: integer
+          description: Number of employees
+        tangible_assets:
+          type: number
+          description: Tangible assets other than cash

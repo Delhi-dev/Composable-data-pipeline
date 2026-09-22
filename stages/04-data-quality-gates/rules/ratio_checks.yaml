@@ -1,0 +1,31 @@
+# Derived-ratio plausibility / outliers (thresholds from settings).
+# Thresholds reference global settings, e.g. ${settings.thresholds.<key>}.
+
+meta:
+  stage: data-quality-gates
+  rule_set: ratio_checks.yaml
+  version: 1
+  lifecycle: active
+  description: Derived-ratio plausibility / outliers (thresholds from settings).
+rules:
+- id: DQ-101
+  description: Related-party revenue share very high
+  field: rpt_revenue_share
+  op: gte
+  threshold: ${settings.thresholds.related_party_revenue_share}
+  severity: 0.5
+  action: outlier
+- id: DQ-102
+  description: Profit per employee above percentile
+  field: profit_per_employee_pctile_rank
+  op: gte
+  threshold: ${settings.thresholds.profit_per_employee_pctile}
+  severity: 0.5
+  action: outlier
+- id: DQ-103
+  description: Zero employees with material revenue
+  field: employees
+  op: eq
+  threshold: 0
+  severity: 0.6
+  action: outlier

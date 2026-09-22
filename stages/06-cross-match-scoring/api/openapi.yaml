@@ -1,0 +1,35 @@
+openapi: 3.0.3
+info:
+  title: "Stage 06 \u2014 Cross-Match & Scoring Service"
+  version: 0.1.0
+  description: Join CbCR risk flags (flags only) with domestic indicators on entity identity, run typology
+    correlation rules, and compute the Audit Potential Index.
+paths:
+  /run:
+    post:
+      summary: Execute this stage on a period / batch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                period:
+                  type: string
+                batch_id:
+                  type: string
+      responses:
+        '202':
+          description: Accepted; produces the stage artifact
+  /result:
+    get:
+      summary: Fetch this stage's produced artifact
+      parameters:
+      - name: batch_id
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: TypologyResult[] + API score

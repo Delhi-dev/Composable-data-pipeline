@@ -1,0 +1,16 @@
+# Weights + aggregation (from settings).
+# Thresholds reference global settings, e.g. ${settings.thresholds.<key>}.
+
+meta:
+  stage: cross-match-scoring
+  rule_set: scoring.yaml
+  version: 1
+  lifecycle: active
+  description: Weights + aggregation (from settings).
+rules:
+- id: SC-001
+  description: Per-typology weighted combine
+  weights_ref: ${settings.scoring_weights}
+- id: SC-002
+  description: Composite API
+  method_ref: ${settings.scoring_weights.composite.method}

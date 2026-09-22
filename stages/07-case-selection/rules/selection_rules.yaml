@@ -1,0 +1,22 @@
+# Cutoffs (from settings).
+# Thresholds reference global settings, e.g. ${settings.thresholds.<key>}.
+
+meta:
+  stage: case-selection
+  rule_set: selection_rules.yaml
+  version: 1
+  lifecycle: active
+  description: Cutoffs (from settings).
+rules:
+- id: SL-001
+  description: Select if API at/above cutoff
+  field: api_score
+  op: gte
+  threshold: ${settings.thresholds.api_cutoff}
+  action: select
+- id: SL-002
+  description: Or within top-N by API
+  field: api_rank
+  op: lte
+  threshold: ${settings.thresholds.top_n}
+  action: select

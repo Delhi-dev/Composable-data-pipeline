@@ -1,0 +1,15 @@
+.git
+__pycache__
+*.py[cod]
+.pytest_cache
+.venv
+venv
+.env
+.env.*
+platform/runtime
+runtime
+*.db
+*.sqlite
+*.sqlite3
+*.xml
+*.XML

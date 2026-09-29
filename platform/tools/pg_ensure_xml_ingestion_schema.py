@@ -26,7 +26,7 @@ def main() -> int:
     a=p.parse_args()
     if a.confirm_database != a.database: raise SystemExit("--confirm-database must exactly match --database")
     if not os.getenv(a.password_env): raise SystemExit(f"Set {a.password_env}; passwords are not accepted on the command line")
-    old=list(sys.argv); sys.argv=["pg_apply_migrations.py","--host",a.host,"--port",str(a.port),"--database",a.database,"--user",a.user,"--password-env",a.password_env,"--through","009","--confirm-database",a.database]
+    old=list(sys.argv); sys.argv=["pg_apply_migrations.py","--host",a.host,"--port",str(a.port),"--database",a.database,"--user",a.user,"--password-env",a.password_env,"--through","010","--confirm-database",a.database]
     try: apply_migrations()
     finally: sys.argv=old
     conn=psycopg2.connect(host=a.host,port=a.port,dbname=a.database,user=a.user,password=os.getenv(a.password_env))
@@ -34,9 +34,9 @@ def main() -> int:
         with conn.cursor() as cur:
             cur.execute("SELECT table_schema||'.'||table_name FROM information_schema.tables WHERE (table_schema='public' OR table_schema='cbcr_staging') AND table_type='BASE TABLE'")
             missing=REQUIRED-{row[0] for row in cur.fetchall()}
-            cur.execute("SELECT migration_id FROM cbcr_control.schema_migration WHERE migration_id='009_xml_ingestion_runtime'")
+            cur.execute("SELECT migration_id FROM cbcr_control.schema_migration WHERE migration_id='010_xml_payload_trigger_fix'")
             if missing or not cur.fetchone(): raise RuntimeError(f"XML ingestion schema incomplete; missing: {', '.join(sorted(missing))}")
-        print(f"PASS XML ingestion schema is ready in database={a.database}; tables={len(REQUIRED)} migration=009")
+        print(f"PASS XML ingestion schema is ready in database={a.database}; tables={len(REQUIRED)} migration=010")
     finally: conn.close()
     return 0
 

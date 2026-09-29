@@ -23,8 +23,8 @@ def parser() -> argparse.ArgumentParser:
     )
     value.add_argument(
         "--through",
-        choices=["000", "001", "002", "003", "004", "005", "006", "007", "008", "009"],
-        default="009",
+        choices=["000", "001", "002", "003", "004", "005", "006", "007", "008", "009", "010"],
+        default="010",
     )
     value.add_argument(
         "--confirm-database",

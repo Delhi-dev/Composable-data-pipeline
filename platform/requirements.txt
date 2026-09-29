@@ -1,9 +1,9 @@
-fastapi>=0.128,<1
-uvicorn>=0.35,<1
-pydantic>=2.12,<3
-psycopg2-binary>=2.9,<3
-lxml>=5.0,<6
+ fastapi>=0.128,<1
+  uvicorn>=0.35,<1
+  pydantic>=2.12,<3
+  psycopg2-binary>=2.9,<3
+  lxml>=5.0,<6
 
-# Verification dependencies
-httpx>=0.28,<1
-pytest>=8,<10
+  # Verification dependencies
+  httpx>=0.28,<1
+  pytest>=8,<10

@@ -47,9 +47,16 @@ EXPECTED_TABLES = {
     "cbcr_risk_ready.jurisdiction_metric",
     "cbcr_risk.result",
     "cbcr_risk.score_component",
+    "cbcr_risk.result_set",
+    "cbcr_risk.result_set_run",
     "cbcr_selection.selection_batch",
     "cbcr_selection.candidate",
     "cbcr_selection.decision_history",
+    "cbcr_selection.candidate_source_result",
+    "cbcr_selection.case_set",
+    "cbcr_selection.case_set_item",
+    "cbcr_selection.audit_case",
+    "cbcr_selection.audit_case_event",
     *{
         "cbcr_control." + name
         for name in (
@@ -76,6 +83,8 @@ REQUIRED_COLUMNS = {
     ("cbcr_dq", "finding", "dedup_key"),
     ("cbcr_risk", "result", "function_run_id"),
     ("cbcr_risk", "result", "output_key"),
+    ("cbcr_selection", "selection_batch", "risk_result_set_id"),
+    ("cbcr_selection", "selection_batch", "selection_policy"),
 }
 
 REQUIRED_CONSTRAINTS = {
@@ -83,6 +92,8 @@ REQUIRED_CONSTRAINTS = {
     "fk_risk_result_report",
     "fk_finding_function_run",
     "fk_risk_function_run",
+    "fk_risk_result_set_dataset",
+    "fk_audit_case_dataset",
 }
 
 REQUIRED_INDEXES = {
@@ -96,6 +107,9 @@ REQUIRED_INDEXES = {
     "uq_pg_finding_dedup",
     "uq_pg_risk_output",
     "uq_pg_candidate_logical",
+    "idx_risk_result_set_dataset",
+    "idx_candidate_source_result_result",
+    "idx_audit_case_status",
 }
 
 
@@ -179,7 +193,7 @@ def main() -> int:
         print(
             f"PASS database={settings.database} schemas={summary['schema_count']} "
             f"tables={summary['table_count']} views={len(views)} triggers={trigger_count} "
-            "migration=007_application_delete_grants privileges=PASS"
+            "migration=011_risk_case_provenance privileges=PASS"
         )
     finally:
         database.close()

@@ -3,9 +3,9 @@
 1. Creates the `cbcr` database and the `cbcr_user` login role if they are missing
    (and keeps the role's password in sync with CBCR_SOURCE_DB_PASSWORD).
 2. Creates the migration ledger table early (the repo's tool needs it before 001 runs),
-   then applies migrations 000-009 with the repo's own tool (applied ones are skipped).
-3. Applies 010_xml_payload_trigger_fix, which the migration tool does not cover.
-   It is a CREATE OR REPLACE FUNCTION, so repeating it is harmless.
+   then applies migrations 000-011 with the repo's own tool (applied ones are skipped).
+3. Reapplies 010_xml_payload_trigger_fix defensively. It is a CREATE OR REPLACE
+   FUNCTION, so repeating it is harmless.
 
 Run as a Railway pre-deploy command:  python platform/tools/railway_bootstrap.py
 """

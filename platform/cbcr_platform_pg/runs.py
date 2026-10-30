@@ -11,6 +11,8 @@ from cbcr_platform.function_library import HANDLERS
 from .access import AccessService
 from .data_plane import DataPlaneService
 from .domestic import DomesticRiskRepository
+from .case_selection import CaseSelectionService
+from .risk_result_sets import RiskResultSetError, RiskResultSetService
 from cbcr_platform.canonical import CanonicalDataAPI
 from .database import PostgreSQLDatabase, PostgreSQLSession, new_uuid, utc_now
 
@@ -189,6 +191,16 @@ class RunService:
             actor,
             request.input_zone,
         )
+        if "generate_case_candidates" in request.functions:
+            case_parameters = request.parameters.get("generate_case_candidates", {})
+            result_set_id = str(case_parameters.get("risk_result_set_id") or "").strip()
+            if result_set_id:
+                try:
+                    RiskResultSetService(self.db).validate_approved(
+                        result_set_id, request.dataset_id, request.dataset_version
+                    )
+                except RiskResultSetError as exc:
+                    raise RunValidationError(str(exc)) from exc
         run_id, now = new_uuid(), utc_now()
         with self.db.transaction() as tx:
             tx.execute(
@@ -273,7 +285,8 @@ class RunService:
 
     def list(self) -> list[dict[str, Any]]:
         rows = self.db.all(
-            """SELECT r.run_id,l.source_id,r.requested_by,r.purpose,r.status,
+            """SELECT r.run_id,r.dataset_id,r.dataset_version,r.input_zone,l.source_id,
+                      r.requested_by,r.purpose,r.status,r.selected_functions,
                       r.created_at,r.completed_at
                FROM cbcr_control.run r
                JOIN cbcr_control.dataset d
@@ -370,6 +383,15 @@ class RunService:
         try:
             api = self.canonical_api_for_run(claimed)
             parameters = dict(claimed["parameters"] or {})
+            if (
+                claimed["function_code"] == "generate_case_candidates"
+                and parameters.get("risk_result_set_id")
+            ):
+                result = CaseSelectionService(self.db).generate(
+                    str(claimed["dataset_id"]), claimed["dataset_version"], parameters
+                )
+                self.complete_claimed(claimed, result)
+                return
             fiscal_year = int(parameters.get("fiscal_year", api.list_reports()[0].reporting_period_end.year))
             if claimed["function_code"] == "load_domestic_risk_context":
                 screen_run = parameters.get("screening_run_id")
@@ -545,11 +567,23 @@ class RunService:
                         ),
                     )
         if claimed["stage"] == "07":
+            parameters = claimed.get("parameters") or {}
+            risk_result_set_id = parameters.get("risk_result_set_id") or None
             batch = tx.one(
                 """INSERT INTO cbcr_selection.selection_batch
-                   (selection_batch_id,run_id,dataset_id,dataset_version,status,created_by,created_at)
-                   VALUES(%s,%s,%s,%s,'open',%s,%s)
-                   ON CONFLICT(run_id) DO UPDATE SET run_id=excluded.run_id
+                   (selection_batch_id,run_id,dataset_id,dataset_version,status,created_by,
+                    created_at,risk_result_set_id,selection_policy)
+                   VALUES(%s,%s,%s,%s,'open',%s,%s,%s,%s)
+                   ON CONFLICT(run_id) DO UPDATE SET
+                     risk_result_set_id=COALESCE(
+                       cbcr_selection.selection_batch.risk_result_set_id,
+                       excluded.risk_result_set_id
+                     ),
+                     selection_policy=CASE
+                       WHEN excluded.risk_result_set_id IS NOT NULL
+                       THEN excluded.selection_policy
+                       ELSE cbcr_selection.selection_batch.selection_policy
+                     END
                    RETURNING selection_batch_id""",
                 (
                     new_uuid(),
@@ -558,6 +592,12 @@ class RunService:
                     version,
                     claimed["requested_by"],
                     now,
+                    risk_result_set_id,
+                    {
+                        "minimum_risk_score": parameters.get("minimum_risk_score", 0),
+                        "allowed_severities": parameters.get("allowed_severities", []),
+                        "allowed_rules": parameters.get("allowed_rules", []),
+                    },
                 ),
             )
             batch_id = str(batch["selection_batch_id"])
@@ -566,14 +606,15 @@ class RunService:
                 if artifact.get("type") != "case_candidate":
                     continue
                 report = api.get_report(artifact["report_id"])
-                tx.execute(
+                candidate_id = new_uuid()
+                inserted_candidate = tx.one(
                     """INSERT INTO cbcr_selection.candidate
                        (candidate_id,selection_batch_id,report_id,entity_id,entity_name,
                         reason_code,score,evidence,decision,decision_rationale,decided_by,decided_at)
                        VALUES(%s,%s,%s,%s,%s,%s,%s,%s,'pending',NULL,NULL,NULL)
-                       ON CONFLICT DO NOTHING""",
+                       ON CONFLICT DO NOTHING RETURNING candidate_id""",
                     (
-                        new_uuid(),
+                        candidate_id,
                         batch_id,
                         artifact["report_id"],
                         artifact.get("entity_id"),
@@ -583,6 +624,29 @@ class RunService:
                         artifact,
                     ),
                 )
+                if inserted_candidate:
+                    candidate_id = str(inserted_candidate["candidate_id"])
+                else:
+                    existing_candidate = tx.one(
+                        """SELECT candidate_id FROM cbcr_selection.candidate
+                           WHERE selection_batch_id=%s AND report_id=%s
+                             AND COALESCE(entity_id,'')=COALESCE(%s,'')
+                             AND reason_code=%s""",
+                        (
+                            batch_id,
+                            artifact["report_id"],
+                            artifact.get("entity_id"),
+                            artifact.get("reason_code", claimed["function_code"]),
+                        ),
+                    )
+                    candidate_id = str(existing_candidate["candidate_id"])
+                for risk_result_id in artifact.get("source_risk_result_ids", []):
+                    tx.execute(
+                        """INSERT INTO cbcr_selection.candidate_source_result
+                           (candidate_id,risk_result_id) VALUES(%s,%s)
+                           ON CONFLICT DO NOTHING""",
+                        (candidate_id, risk_result_id),
+                    )
 
     def _finalize_parent(self, tx: PostgreSQLSession, run_id: str) -> None:
         counts = tx.one(

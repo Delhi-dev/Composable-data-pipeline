@@ -18,7 +18,7 @@ FUNCTIONS = [
     ("analyze_etr_outlier", "05", "Effective tax rate outlier", "Flags low jurisdiction effective tax rates.", "risk_assessment", {"minimum_etr": {"type": "number", "default": 0.05}}),
     ("cross_match_domestic_turnover", "06", "Cross-match domestic turnover", "Creates a nomenclature-neutral domestic cross-match request.", "risk_assessment", {"domestic_jurisdiction": {"type": "string", "default": "IN"}}),
     ("score_risk_components", "06", "Score risk components", "Produces explainable component scores.", "risk_assessment", {}),
-    ("generate_case_candidates", "07", "Generate case candidates", "Produces reviewable candidate artifacts.", "case_review", {"minimum_profit_margin": {"type": "number", "default": 0.4}}),
+    ("generate_case_candidates", "07", "Generate case candidates", "Creates reviewable candidates from an explicitly approved set of completed risk runs; the legacy profit-margin parameter remains available for SQLite compatibility.", "case_review", {"risk_result_set_id": {"type": "string", "default": ""}, "minimum_risk_score": {"type": "number", "default": 0}, "allowed_severities": {"type": "array", "default": []}, "allowed_rules": {"type": "array", "default": []}, "minimum_profit_margin": {"type": "number", "default": 0.4}}),
     ("create_selection_report", "07", "Create selection report", "Creates a minimised selection report.", "case_review", {}),
 ]
 

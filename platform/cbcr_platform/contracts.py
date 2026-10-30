@@ -168,6 +168,29 @@ class SelectionDecisionRequest(BaseModel):
     rationale: str = Field(min_length=1)
 
 
+class RiskResultSetCreate(BaseModel):
+    dataset_id: str
+    dataset_version: int = Field(default=1, ge=1)
+    name: str = Field(min_length=1, max_length=200)
+    run_ids: list[str] = Field(min_length=1)
+    selection_policy: dict[str, Any] = Field(default_factory=dict)
+
+
+class RiskResultSetApproval(BaseModel):
+    rationale: str = Field(min_length=1)
+
+
+class CaseSetFinalizeRequest(BaseModel):
+    name: str = Field(min_length=1, max_length=200)
+    rationale: str = Field(min_length=1)
+
+
+class AuditCaseStatusRequest(BaseModel):
+    status: Literal["ready_for_handoff", "exported", "accepted_by_audit", "closed"]
+    external_reference: str | None = None
+    rationale: str = Field(min_length=1)
+
+
 class ColumnDictionaryEntry(BaseModel):
     logical_object: Literal["report", "entity", "metric"]
     canonical_field: str

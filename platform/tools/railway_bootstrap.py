@@ -2,9 +2,11 @@
 
 1. Creates the `cbcr` database and the `cbcr_user` login role if they are missing
    (and keeps the role's password in sync with CBCR_SOURCE_DB_PASSWORD).
-2. Creates the migration ledger table early (the repo's tool needs it before 001 runs),
-   then applies migrations 000-011 with the repo's own tool (applied ones are skipped).
-3. Reapplies 010_xml_payload_trigger_fix defensively. It is a CREATE OR REPLACE
+2. Creates the migration ledger table early (the repo's tool needs it before 001 runs).
+3. Applies migrations 000-011 on a fresh database. An established installation that
+   already records migration 009 applies only migration 011, avoiding historical
+   checksum conflicts.
+4. Reapplies 010_xml_payload_trigger_fix defensively. It is a CREATE OR REPLACE
    FUNCTION, so repeating it is harmless.
 
 Run as a Railway pre-deploy command:  python platform/tools/railway_bootstrap.py
@@ -76,16 +78,32 @@ def ensure_migration_ledger() -> None:
         conn.close()
 
 
-def apply_migrations() -> None:
-    subprocess.run(
-        [
-            sys.executable,
-            str(ROOT / "tools" / "pg_apply_migrations.py"),
-            "--database", DATABASE,
-            "--confirm-database", DATABASE,
-        ],
-        check=True,
-    )
+def established_framework() -> bool:
+    """Return true only after the last pre-V2 framework migration is recorded."""
+    conn = connect(DATABASE)
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """SELECT EXISTS(
+                       SELECT 1 FROM cbcr_control.schema_migration
+                       WHERE migration_id='009_xml_ingestion_runtime'
+                   )"""
+            )
+            return bool(cur.fetchone()[0])
+    finally:
+        conn.close()
+
+
+def apply_migrations(established: bool) -> None:
+    command = [
+        sys.executable,
+        str(ROOT / "tools" / "pg_apply_migrations.py"),
+        "--database", DATABASE,
+        "--confirm-database", DATABASE,
+    ]
+    if established:
+        command.extend(["--from", "011", "--through", "011"])
+    subprocess.run(command, check=True)
 
 
 def apply_trigger_fix() -> None:
@@ -109,8 +127,12 @@ def main() -> int:
         raise SystemExit("The migrations hard-code database 'cbcr' and role 'cbcr_user'; keep those names.")
     ensure_database_and_role()
     ensure_migration_ledger()
-    apply_migrations()
-    apply_trigger_fix()
+    established = established_framework()
+    if established:
+        apply_trigger_fix()
+    apply_migrations(established)
+    if not established:
+        apply_trigger_fix()
     print("Railway database setup complete")
     return 0
 

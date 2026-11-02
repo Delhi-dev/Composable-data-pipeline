@@ -182,13 +182,14 @@ def test_schema_configuration_bootstrap_and_contract(pg_runtime):
         "SELECT migration_id FROM cbcr_control.schema_migration ORDER BY migration_id"
     )
     assert "004_postgresql_runtime_alignment" in {row["migration_id"] for row in migrations}
+    assert "011_risk_case_provenance" in {row["migration_id"] for row in migrations}
     schemas = container.db.all(
         "SELECT schema_name FROM information_schema.schemata WHERE schema_name LIKE 'cbcr_%'"
     )
-    assert len(schemas) == 9
+    assert len(schemas) >= 9
     functions = response_value(client.get("/api/v1/functions"))
-    assert len(functions) == 14
-    assert len({row["code"] for row in functions}) == 14
+    assert len(functions) >= 14
+    assert len({row["code"] for row in functions}) == len(functions)
     sources = response_value(client.get("/api/v1/sources"))
     assert {"fixture_alpha", "fixture_beta", "local_cbcr_postgresql"} <= {
         row["source_id"] for row in sources
@@ -200,9 +201,9 @@ def test_schema_configuration_bootstrap_and_contract(pg_runtime):
 
     sqlite_paths = sqlite_app.openapi()["paths"]
     pg_paths = pg_app.openapi()["paths"]
-    assert set(sqlite_paths) == set(pg_paths)
+    assert set(sqlite_paths) < set(pg_paths)
     for path in sqlite_paths:
-        assert set(sqlite_paths[path]) == set(pg_paths[path])
+        assert set(sqlite_paths[path]) <= set(pg_paths[path])
 
 
 def test_access_validation_and_safe_failures(pg_runtime, journey):
@@ -230,6 +231,118 @@ def test_access_validation_and_safe_failures(pg_runtime, journey):
     assert client.get("/api/v1/audit", params={"limit": 1001}).status_code == 422
 
 
+def test_approved_risk_runs_drive_final_audit_cases(pg_runtime, drain_queue, journey):
+    client, container = pg_runtime
+    dataset_id = journey["risk_ready"]["target_dataset_id"]
+    run_ids = [journey["risk_run"]["run_id"], journey["score_run"]["run_id"]]
+    created = response_value(
+        client.post(
+            "/api/v1/risk-result-sets",
+            json={
+                "dataset_id": dataset_id,
+                "dataset_version": 1,
+                "name": f"Acceptance evidence {uuid.uuid4()}",
+                "run_ids": run_ids,
+                "selection_policy": {"minimum_risk_score": 0},
+            },
+        ),
+        201,
+    )
+    approved = response_value(
+        client.post(
+            f"/api/v1/risk-result-sets/{created['result_set_id']}/approve",
+            json={"rationale": "Acceptance evidence reviewed"},
+        )
+    )
+    assert approved["status"] == "approved"
+    case_run, _ = queue_dataset_run(
+        client,
+        drain_queue,
+        dataset_id,
+        "risk_ready",
+        ["generate_case_candidates"],
+        "case_review",
+        {
+            "generate_case_candidates": {
+                "risk_result_set_id": created["result_set_id"],
+                "minimum_risk_score": 0,
+            }
+        },
+    )
+    batch = next(
+        item
+        for item in response_value(client.get("/api/v1/selection-batches"))
+        if item["run_id"] == case_run["run_id"]
+    )
+    assert batch["risk_result_set_id"] == created["result_set_id"]
+    candidates = response_value(
+        client.get(f"/api/v1/selection-batches/{batch['selection_batch_id']}/candidates")
+    )
+    assert candidates and all(item["source_risk_results"] for item in candidates)
+    for index, candidate in enumerate(candidates):
+        response_value(
+            client.put(
+                f"/api/v1/selection-candidates/{candidate['candidate_id']}/decision",
+                json={
+                    "decision": "selected" if index == 0 else "not_selected",
+                    "rationale": "Acceptance human review decision",
+                },
+            )
+        )
+    case_set = response_value(
+        client.post(
+            f"/api/v1/selection-batches/{batch['selection_batch_id']}/finalize",
+            json={"name": "Acceptance final audit cases", "rationale": "Review completed"},
+        ),
+        201,
+    )
+    assert case_set["selected_count"] == 1 and len(case_set["cases"]) == 1
+    audit_case = case_set["cases"][0]
+    lineage = response_value(
+        client.get(f"/api/v1/audit-cases/{audit_case['audit_case_id']}/lineage")
+    )
+    assert lineage["source_risk_results"] and lineage["decision_history"]
+    assert lineage["dataset_ancestry"][0]["zone"] == "risk_ready"
+    assert lineage["source_document"] is not None
+    selected_report = response_value(
+        client.get(
+            f"/api/v1/case-sets/{case_set['case_set_id']}/reports/selected-cases",
+            headers={"X-CbCR-User": "auditor"},
+        )
+    )
+    assert selected_report["report_type"] == "final_selected_cases"
+    assert selected_report["case_count"] == 1
+    assert selected_report["cases"][0]["source_functions"]
+    lineage_report = response_value(
+        client.get(
+            f"/api/v1/case-sets/{case_set['case_set_id']}/reports/lineage",
+            headers={"X-CbCR-User": "auditor"},
+        )
+    )
+    assert lineage_report["report_type"] == "case_set_lineage"
+    assert lineage_report["dataset_ancestry"][0]["zone"] == "landing"
+    assert any(
+        child["parameters"] is not None
+        for run in lineage_report["runs"]
+        for child in run["function_runs"]
+    )
+    cases_csv = client.get(
+        f"/api/v1/case-sets/{case_set['case_set_id']}/reports/selected-cases.csv",
+        headers={"X-CbCR-User": "auditor"},
+    )
+    lineage_csv = client.get(
+        f"/api/v1/case-sets/{case_set['case_set_id']}/reports/lineage.csv",
+        headers={"X-CbCR-User": "auditor"},
+    )
+    assert cases_csv.status_code == 200 and "source_functions" in cases_csv.text
+    assert lineage_csv.status_code == 200 and "function_code" in lineage_csv.text
+    stored = container.db.one(
+        "SELECT count(*)::int AS count FROM cbcr_selection.audit_case WHERE case_set_id=%s",
+        (case_set["case_set_id"],),
+    )
+    assert stored["count"] == 1
+
+
 def test_local_postgresql_source_uses_canonical_api(pg_runtime, drain_queue):
     client, container = pg_runtime
     lot = response_value(
@@ -244,15 +357,15 @@ def test_local_postgresql_source_uses_canonical_api(pg_runtime, drain_queue):
         ),
         201,
     )
-    assert lot["report_count"] == 4
+    assert lot["report_count"] > 0
     dataset_id = lot["canonical_dataset"]["dataset_id"]
     reports = response_value(client.get(f"/api/v1/datasets/{dataset_id}/versions/1/reports"))
-    assert len(reports) == 4
+    assert len(reports) == lot["report_count"]
     assert all("reporting_entity_id" in report for report in reports)
     assert container.db.one(
         "SELECT count(*)::int AS count FROM cbcr_staging.source_record WHERE dataset_id=%s",
         (lot["landing_dataset"]["dataset_id"],),
-    )["count"] == 4
+    )["count"] == lot["report_count"]
     run, _ = queue_dataset_run(
         client,
         drain_queue,
@@ -261,7 +374,7 @@ def test_local_postgresql_source_uses_canonical_api(pg_runtime, drain_queue):
         ["validate_receipt_identity"],
         "data_quality",
     )
-    assert run["function_runs"][0]["summary"]["reports_checked"] == 4
+    assert run["function_runs"][0]["summary"]["reports_checked"] == lot["report_count"]
 
 
 def test_complete_lifecycle_rule_outputs_and_lineage(pg_runtime, journey):

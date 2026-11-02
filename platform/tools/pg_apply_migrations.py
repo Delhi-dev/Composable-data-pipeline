@@ -14,6 +14,7 @@ MIGRATION_ROOT = ROOT / "migrations" / "postgresql"
 
 def parser() -> argparse.ArgumentParser:
     value = argparse.ArgumentParser(description="Apply pending CbCR PostgreSQL migrations")
+    sequences = ["000", "001", "002", "003", "004", "005", "006", "007", "008", "009", "010", "011"]
     value.add_argument("--host", default=os.getenv("CBCR_PG_HOST", "localhost"))
     value.add_argument("--port", type=int, default=int(os.getenv("CBCR_PG_PORT", "5432")))
     value.add_argument("--database", default=os.getenv("CBCR_PG_DATABASE", "cbcr"))
@@ -22,9 +23,16 @@ def parser() -> argparse.ArgumentParser:
         "--password-env", default=os.getenv("CBCR_PG_MIGRATION_PASSWORD_ENV", "CBCR_PG_MIGRATION_PASSWORD")
     )
     value.add_argument(
+        "--from",
+        dest="start_at",
+        choices=sequences,
+        default="000",
+        help="First migration sequence to inspect; use 011 when upgrading a historical installation whose earlier checksums differ",
+    )
+    value.add_argument(
         "--through",
-        choices=["000", "001", "002", "003", "004", "005", "006", "007", "008", "009", "010"],
-        default="010",
+        choices=sequences,
+        default="011",
     )
     value.add_argument(
         "--confirm-database",
@@ -79,6 +87,12 @@ def migration_sql(path: Path) -> str:
 
 def record(connection, migration_id: str, value_checksum: str) -> None:
     with connection.cursor() as cursor:
+        cursor.execute("SELECT to_regclass('cbcr_control.schema_migration')")
+        if cursor.fetchone()[0] is None:
+            # The legacy XML foundation migration intentionally precedes the
+            # control-plane ledger. It is backfilled after migration 005 adds
+            # checksum support.
+            return
         if has_checksum_column(connection):
             cursor.execute(
                 """INSERT INTO cbcr_control.schema_migration(migration_id,description,checksum)
@@ -102,6 +116,8 @@ def main() -> int:
         raise SystemExit(f"Set {args.password_env}; passwords are not accepted on the command line")
     if args.confirm_database != args.database:
         raise SystemExit("--confirm-database must exactly match --database")
+    if args.start_at > args.through:
+        raise SystemExit("--from must be less than or equal to --through")
     connection = psycopg2.connect(
         host=args.host, port=args.port, dbname=args.database, user=args.user, password=password
     )
@@ -112,7 +128,7 @@ def main() -> int:
         connection.commit()
         for path in sorted(MIGRATION_ROOT.glob("*.sql")):
             sequence = path.name[:3]
-            if sequence > args.through:
+            if sequence < args.start_at or sequence > args.through:
                 continue
             migration_id = path.stem
             value_checksum = checksum(path)
@@ -132,7 +148,10 @@ def main() -> int:
         # then all subsequent executions enforce conflict detection.
         if has_checksum_column(connection):
             for path in sorted(MIGRATION_ROOT.glob("*.sql")):
-                if path.name[:3] <= args.through and applied(connection, path.stem, checksum(path)):
+                if (
+                    args.start_at <= path.name[:3] <= args.through
+                    and applied(connection, path.stem, checksum(path))
+                ):
                     record(connection, path.stem, checksum(path))
             connection.commit()
     finally:

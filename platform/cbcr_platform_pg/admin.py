@@ -139,11 +139,17 @@ class AdminService:
 
     def selection_batches(self) -> list[dict[str, Any]]:
         rows = self.db.all(
-            "SELECT * FROM cbcr_selection.selection_batch ORDER BY created_at DESC"
+            """SELECT sb.*,rs.name AS risk_result_set_name,
+                      rs.status AS risk_result_set_status
+               FROM cbcr_selection.selection_batch sb
+               LEFT JOIN cbcr_risk.result_set rs
+                 ON rs.result_set_id=sb.risk_result_set_id
+               ORDER BY sb.created_at DESC"""
         )
         for row in rows:
-            for key in ("selection_batch_id", "run_id", "dataset_id"):
-                row[key] = str(row[key])
+            for key in ("selection_batch_id", "run_id", "dataset_id", "risk_result_set_id"):
+                if row.get(key) is not None:
+                    row[key] = str(row[key])
         return rows
 
     def selection_candidates(self, batch_id: str) -> list[dict[str, Any]]:
@@ -155,6 +161,17 @@ class AdminService:
         for row in rows:
             row["candidate_id"] = str(row["candidate_id"])
             row["selection_batch_id"] = str(row["selection_batch_id"])
+            sources = self.db.all(
+                """SELECT rr.risk_result_id,rr.run_id,rr.rule_code,rr.severity,rr.result
+                   FROM cbcr_selection.candidate_source_result csr
+                   JOIN cbcr_risk.result rr ON rr.risk_result_id=csr.risk_result_id
+                   WHERE csr.candidate_id=%s ORDER BY rr.rule_code,rr.risk_result_id""",
+                (row["candidate_id"],),
+            )
+            for source in sources:
+                source["risk_result_id"] = str(source["risk_result_id"])
+                source["run_id"] = str(source["run_id"])
+            row["source_risk_results"] = sources
         return rows
 
     def decide_candidate(

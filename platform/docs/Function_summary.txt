@@ -1,0 +1,165 @@
+				FUNCTION DEFINITIONS
+
+
+Functions Location: <<platform/cbcr_platform/function_library.py>>
+
+
+********************************
+
+`validate_receipt_identity`: Confirms that each report has both a message reference and a reporting-entity identifier, so as to identify the received report reliably.
+
+Finding raised: `RECEIPT_IDENTITY_MISSING` with severity `error` when either value is absent.
+
+Output: Count of reports checked and zero or more findings.
+
+*********
+
+
+`detect_duplicate_report`: Looks for two reports in the dataset with the same business identity: message reference, reporting-entity identifier and reporting-period end date.
+
+Finding raised: `DUPLICATE_REPORT` with severity `error` for every later occurrence of the same business key. The first report is treated as the original.
+
+Output: The number of unique business keys and zero or more findings.
+
+*********
+
+
+Stage 02 — normalisation readiness
+
+**********
+
+`normalize_currency`: Checks that every report contains a three-character reporting-currency code and records the desired target currency in a normalisation plan.
+
+**Important current behaviour:** It does **not** obtain exchange rates or convert monetary values. It validates readiness and produces a plan only.
+
+Finding raised: `INVALID_CURRENCY_CODE` with severity `error` if the source code is missing or is not three characters long.
+
+**Output:** Reports-ready count, target currency and a normalisation_plan artifact.
+
+
+**********
+
+`standardize_identifiers`: Checks whether an entity TIN contains leading/trailing spaces or lowercase characters and shows the trimmed, uppercase form that would be canonical. It does NOT rewrite the source TIN. It only reports that standardisation is needed and supplies a preview.
+
+Finding raised: `IDENTIFIER_NOT_STANDARD` with severity `warning`, scoped to the entity, with `canonical_preview` in the evidence.
+
+Output: Entity count and zero or more findings.
+
+
+**********
+
+Stage 03 — entity enrichment readiness
+
+
+`resolve_entity`: Assesses whether constituent entities can be linked deterministically by checking for a TIN.
+
+**Important current behaviour:** It does not perform fuzzy matching, create a TIN or change the entity. It identifies missing deterministic link keys.
+
+Parameter: (`require_tin` | boolean | `true`) When true, raise a warning for each entity without a TIN. When false, the current rule raises no missing-TIN warning.
+
+Finding raised: `ENTITY_TIN_UNAVAILABLE` with severity `warning`, scoped to the entity.
+
+Output: Entity count and zero or more findings.
+
+
+********
+
+`enrich_jurisdiction_reference`: Checks that jurisdiction values on CbCR metric rows are represented as two-character codes. (Important): It currently validates code shape only. It does not perform a complete ISO-code lookup or add jurisdiction reference attributes.
+
+Finding raised: `INVALID_JURISDICTION` with severity `error` when the value is not two characters long.
+
+Output: Metric-row count and zero or more findings.
+
+*********
+
+Stage 04 — data-quality checks
+
+*********
+`check_completeness`: For every report/jurisdiction metric row, checks that each configured canonical metric has a value.
+
+Finding raised: `REQUIRED_METRIC_MISSING` with severity `error`, separately for each affected report/jurisdiction. Evidence lists the missing metric names.
+
+
+*********
+
+`check_rpt_share_threshold`: Calculates related-party revenue divided by total revenue for each jurisdiction row and warns when the share is above the configured limit.
+
+| `maximum_related_share` | number | `0.9` | Maximum acceptable related-party share. `0.9` means 90%.
+
+Rows with zero/missing total revenue or missing related-party revenue are not evaluated by this rule.
+
+
+Finding raised: `RELATED_REVENUE_SHARE_HIGH` with severity `warning`, with the calculated share and limit in evidence.
+
+Stage 05 — risk screening
+
+**********
+
+`analyze_profit_presence_mismatch`: Finds jurisdictions that report a high profit-before-tax margin but very few employees. This is an initial risk indicator that profit may be disproportionate to local operating presence.
+
+The rule calculates `profit_before_tax / revenue` and raises a finding when the margin is greater than or equal to the margin threshold, and employees are less than or equal to the employee threshold.
+
+| `minimum_profit_margin` `0.25` (Minimum PBT/revenue ratio. `0.25` means 25%.)
+(`maximum_employees` :`2`)
+
+Finding raised: `PROFIT_PRESENCE_MISMATCH` with severity `warning`, with margin and employee count in evidence.
+
+**********
+
+
+`analyze_etr_outlier`: Finds profitable jurisdictions whose reported effective tax rate is below a chosen threshold.
+(`minimum_etr` : 0.05; Minimum acceptable effective tax rate.)
+
+Finding raised: `LOW_EFFECTIVE_TAX_RATE` with severity `warning`, with calculated ETR and threshold in evidence.
+
+***
+Stage 06 — scoring and domestic-data risk analysis
+***
+`score_risk_components`: Creates a simple explainable score for each report based on the number of its jurisdiction rows whose cash-tax ETR is below 5%.
+
+Each qualifying row adds 25 points, capped at 100.
+
+*************
+
+`analyze_outbound_low_substance_payments`: Combines domestic outbound-payment data with CbCR data. It flags a material related-party payment when the payee jurisdiction has either low employee presence or a low CbCR ETR.
+
+The function also calculates the payment/domestic-turnover ratio when domestic revenue is available. Its explainable score starts at 35, adds 25 for low headcount, 25 for low ETR and 15 when payment exceeds 10% of turnover, capped at 100.
+
+
+(`domestic_context_id` : ID returned by `load_domestic_risk_context`)
+
+(`fiscal_year` : `2025` Domestic fiscal year)
+| `min_payment_amount` : Minimum aggregated related-party outbound gross payment to evaluate. )
+(`low_tax_etr_threshold` - CbCR ETR below which the payee jurisdiction is treated as low-tax. `0.1` means 10%.)
+(`substance_employee_threshold` - Employee count at or below which the payee jurisdiction is treated as low-substance. )
+
+( `match_confidence_floor` - Minimum domestic entity-link confidence for a fresh reduction. )
+
+*******
+
+`analyze_interest_stripping`: Combines domestic financial and related-party interest data with CbCR information to identify possible interest-stripping or thin-capitalisation risk.
+
+The function calculates:
+
+- EBITDA as domestic PBT + total interest expense + depreciation/amortisation;
+- related-party interest / EBITDA;
+- closing related-party borrowings / domestic equity; and
+- whether an interest payment goes to a CbCR jurisdiction below the low-tax ETR threshold.
+
+A finding is raised if material related-party interest is present and any of the three risk tests is met. The score adds 45 for excessive interest/EBITDA, 30 for excessive debt/equity and 25 for a low-tax finance hub, capped at 100.
+
+ ********
+
+Stage 07 — case-review preparation
+
+****
+
+
+`generate_case_candidates`: : Reads the exact risk results contained in an approved Risk Result Set, applies optional score/severity/rule filters, groups the retained results by report and entity, and creates traceable candidates for human review.
+
+Before running it, the user must create a Risk Result Set from selected successful risk runs and approve/freeze that set. It must belong to the same risk-ready dataset/version.
+
+***********
+
+
+`create_selection_report`: Creates a minimal listing of every report in the input dataset, with report ID, reporting-entity name and period-end date.

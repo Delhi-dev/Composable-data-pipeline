@@ -6,10 +6,12 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from cbcr_platform.contracts import (
+    AuditCaseStatusRequest,
+    CaseSetFinalizeRequest,
     DatasetRunRequest,
     FunctionDraft,
     GateEvaluationRequest,
@@ -19,6 +21,8 @@ from cbcr_platform.contracts import (
     PipelineProfileRequest,
     PromotionRequest,
     RoleAssignment,
+    RiskResultSetApproval,
+    RiskResultSetCreate,
     RunRequest,
     SelectionDecisionRequest,
     SourceCreate,
@@ -30,10 +34,13 @@ from cbcr_platform.function_library import HANDLERS
 from .access import AccessDenied
 from .admin import AdminConflict, AdminNotFound
 from .catalog import ConflictError
+from .case_handoff import CaseHandoffError
 from .container import PostgreSQLContainer
 from .data_plane import DataPlaneError
 from .database import new_uuid, utc_now
 from .runs import RunValidationError
+from .risk_result_sets import RiskResultSetError
+from .reports import CaseReportError
 
 
 container = PostgreSQLContainer()
@@ -88,6 +95,15 @@ def may_view_run(user: str, value: dict) -> bool:
 def require_run_view(user: str, value: dict) -> None:
     if not may_view_run(user, value):
         raise HTTPException(403, "view_results denied for one or more run stages")
+
+
+def require_case_view(user: str) -> None:
+    case_access = container.access.decide(
+        user, "view_results", stage="07", purpose="case_review"
+    ).allowed
+    audit_access = container.access.decide(user, "view_audit").allowed
+    if not (case_access or audit_access):
+        raise HTTPException(403, "case and audit access denied")
 
 
 @app.get("/", include_in_schema=False)
@@ -475,10 +491,189 @@ def selection_batches(user: Annotated[str, Depends(actor)]):
     return container.admin.selection_batches()
 
 
+@app.get("/api/v1/datasets/{dataset_id}/versions/{version}/risk-runs")
+def completed_risk_runs(
+    dataset_id: str, version: int, user: Annotated[str, Depends(actor)]
+):
+    require(user, "view_datasets")
+    return container.risk_result_sets.completed_runs(dataset_id, version)
+
+
+@app.get("/api/v1/risk-result-sets")
+def risk_result_sets(
+    user: Annotated[str, Depends(actor)], dataset_id: str | None = None
+):
+    require_case_view(user)
+    return container.risk_result_sets.list(dataset_id)
+
+
+@app.post("/api/v1/risk-result-sets", status_code=201)
+def create_risk_result_set(
+    value: RiskResultSetCreate, user: Annotated[str, Depends(actor)]
+):
+    require(user, "manage_selection", stage="07", purpose="case_review")
+    try:
+        return container.risk_result_sets.create(value, user)
+    except RiskResultSetError as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
+@app.get("/api/v1/risk-result-sets/{result_set_id}")
+def get_risk_result_set(
+    result_set_id: str, user: Annotated[str, Depends(actor)]
+):
+    require_case_view(user)
+    value = container.risk_result_sets.get(result_set_id)
+    if not value:
+        raise HTTPException(404, "risk-result set not found")
+    return value
+
+
+@app.post("/api/v1/risk-result-sets/{result_set_id}/approve")
+def approve_risk_result_set(
+    result_set_id: str,
+    value: RiskResultSetApproval,
+    user: Annotated[str, Depends(actor)],
+):
+    require(user, "manage_selection", stage="07", purpose="case_review")
+    try:
+        return container.risk_result_sets.approve(result_set_id, user, value.rationale)
+    except RiskResultSetError as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
 @app.get("/api/v1/selection-batches/{batch_id}/candidates")
 def selection_candidates(batch_id: str, user: Annotated[str, Depends(actor)]):
     require(user, "view_results", stage="07", purpose="case_review")
     return container.admin.selection_candidates(batch_id)
+
+
+@app.post("/api/v1/selection-batches/{batch_id}/finalize", status_code=201)
+def finalize_selection_batch(
+    batch_id: str,
+    value: CaseSetFinalizeRequest,
+    user: Annotated[str, Depends(actor)],
+):
+    require(user, "manage_selection", stage="07", purpose="case_review")
+    try:
+        return container.case_handoff.finalize(batch_id, value, user)
+    except CaseHandoffError as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
+@app.get("/api/v1/case-sets")
+def case_sets(user: Annotated[str, Depends(actor)]):
+    require_case_view(user)
+    return container.case_handoff.case_sets()
+
+
+@app.get("/api/v1/case-sets/{case_set_id}")
+def case_set(case_set_id: str, user: Annotated[str, Depends(actor)]):
+    require_case_view(user)
+    value = container.case_handoff.case_set(case_set_id)
+    if not value:
+        raise HTTPException(404, "case set not found")
+    return value
+
+
+@app.get("/api/v1/case-sets/{case_set_id}/export")
+def export_case_set(case_set_id: str, user: Annotated[str, Depends(actor)]):
+    require_case_view(user)
+    try:
+        return container.case_handoff.export_case_set(case_set_id)
+    except CaseHandoffError as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+
+@app.get("/api/v1/case-sets/{case_set_id}/reports/selected-cases")
+def selected_cases_report(case_set_id: str, user: Annotated[str, Depends(actor)]):
+    require_case_view(user)
+    try:
+        return container.reports.selected_cases(case_set_id)
+    except CaseReportError as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+
+@app.get("/api/v1/case-sets/{case_set_id}/reports/selected-cases.csv")
+def selected_cases_report_csv(case_set_id: str, user: Annotated[str, Depends(actor)]):
+    require_case_view(user)
+    try:
+        content = container.reports.selected_cases_csv(case_set_id)
+    except CaseReportError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    return Response(
+        content=content,
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="selected-cases-{case_set_id}.csv"'
+        },
+    )
+
+
+@app.get("/api/v1/case-sets/{case_set_id}/reports/lineage")
+def case_set_lineage_report(case_set_id: str, user: Annotated[str, Depends(actor)]):
+    require_case_view(user)
+    try:
+        return container.reports.lineage(case_set_id)
+    except CaseReportError as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+
+@app.get("/api/v1/case-sets/{case_set_id}/reports/lineage.csv")
+def case_set_lineage_report_csv(case_set_id: str, user: Annotated[str, Depends(actor)]):
+    require_case_view(user)
+    try:
+        content = container.reports.lineage_csv(case_set_id)
+    except CaseReportError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    return Response(
+        content=content,
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": f'attachment; filename="case-lineage-{case_set_id}.csv"'
+        },
+    )
+
+
+@app.get("/api/v1/audit-cases")
+def audit_cases(
+    user: Annotated[str, Depends(actor)],
+    case_set_id: str | None = None,
+    status: str | None = None,
+):
+    require_case_view(user)
+    return container.case_handoff.audit_cases(case_set_id=case_set_id, status=status)
+
+
+@app.get("/api/v1/audit-cases/{audit_case_id}")
+def audit_case(audit_case_id: str, user: Annotated[str, Depends(actor)]):
+    require_case_view(user)
+    value = container.case_handoff.audit_case(audit_case_id)
+    if not value:
+        raise HTTPException(404, "audit case not found")
+    return value
+
+
+@app.put("/api/v1/audit-cases/{audit_case_id}/status")
+def update_audit_case(
+    audit_case_id: str,
+    value: AuditCaseStatusRequest,
+    user: Annotated[str, Depends(actor)],
+):
+    require(user, "manage_selection", stage="07", purpose="case_review")
+    try:
+        return container.case_handoff.update_case(audit_case_id, value, user)
+    except CaseHandoffError as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+
+@app.get("/api/v1/audit-cases/{audit_case_id}/lineage")
+def audit_case_lineage(audit_case_id: str, user: Annotated[str, Depends(actor)]):
+    require_case_view(user)
+    value = container.lineage.audit_case(audit_case_id)
+    if not value:
+        raise HTTPException(404, "audit case not found")
+    return value
 
 
 @app.put("/api/v1/selection-candidates/{candidate_id}/decision")

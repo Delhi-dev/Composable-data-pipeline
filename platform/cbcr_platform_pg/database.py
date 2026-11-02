@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import uuid
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -23,7 +24,7 @@ def new_uuid() -> str:
 
 def _adapt(value: Any) -> Any:
     if isinstance(value, (dict, list)):
-        return Json(value)
+        return Json(value, dumps=lambda item: json.dumps(item, default=str))
     return value
 
 
@@ -57,7 +58,7 @@ class PostgreSQLSession:
 
 
 class PostgreSQLDatabase:
-    required_migration = "009_xml_ingestion_runtime"
+    required_migration = "011_risk_case_provenance"
 
     def __init__(self, settings: PostgreSQLSettings):
         self.settings = settings

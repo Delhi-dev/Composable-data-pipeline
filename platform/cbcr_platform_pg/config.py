@@ -37,6 +37,7 @@ class PostgreSQLSettings:
     worker_lease_seconds: int
     worker_max_attempts: int
     fixture_root: Path
+    source_endpoint: str | None
     application_name: str = "cbcr-platform-postgresql"
 
     def password(self) -> str:
@@ -57,6 +58,7 @@ class PostgreSQLSettings:
             "sslmode": self.sslmode,
             "pool_min": self.pool_min,
             "pool_max": self.pool_max,
+            "source_endpoint_configured": bool(self.source_endpoint),
         }
 
 
@@ -83,5 +85,6 @@ def get_settings() -> PostgreSQLSettings:
         worker_lease_seconds=_integer("CBCR_WORKER_LEASE_SECONDS", 60),
         worker_max_attempts=_integer("CBCR_WORKER_MAX_ATTEMPTS", 3),
         fixture_root=PACKAGE_ROOT / "fixtures",
+        source_endpoint=os.getenv("CBCR_SOURCE_ENDPOINT") or None,
     )
 

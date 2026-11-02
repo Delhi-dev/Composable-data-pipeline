@@ -11,7 +11,7 @@ DOMESTIC_FUNCTIONS = (
 )
 
 
-def seed(db: PostgreSQLDatabase) -> None:
+def seed(db: PostgreSQLDatabase, source_endpoint: str | None = None) -> None:
     now = utc_now()
     sources = (
         ("fixture_alpha", "Fixture schema Alpha", "fixture-json", "schema_alpha.json", None),
@@ -20,7 +20,8 @@ def seed(db: PostgreSQLDatabase) -> None:
             "local_cbcr_postgresql",
             "Local PostgreSQL CbCR XML store",
             "postgresql-canonical",
-            "postgresql://cbcr_user@localhost:5432/cbcr?view=cbcr_canonical.v_api_report_json",
+            source_endpoint
+            or "postgresql://cbcr_user@localhost:5432/cbcr?view=cbcr_canonical.v_api_report_json",
             "env:CBCR_SOURCE_DB_PASSWORD",
         ),
     )
@@ -107,6 +108,13 @@ def seed(db: PostgreSQLDatabase) -> None:
                    VALUES(%s,%s,%s,%s,%s,true,%s,%s) ON CONFLICT(source_id) DO NOTHING""",
                 (*source, now, now),
             )
+        if source_endpoint:
+            tx.execute(
+                """UPDATE cbcr_control.source
+                   SET endpoint_link=%s,updated_at=%s
+                   WHERE source_id='local_cbcr_postgresql'""",
+                (source_endpoint, now),
+            )
         for profile_id, source_id, mapping in mappings:
             tx.execute(
                 """INSERT INTO cbcr_control.mapping_profile
@@ -190,6 +198,9 @@ def seed(db: PostgreSQLDatabase) -> None:
                     parameter_schema,output_classification,lifecycle,created_by,
                     created_at,activated_at,retired_at)
                    VALUES(%s,1,%s,%s,%s,%s,%s,%s,'restricted','active','system',%s,%s,NULL)
-                   ON CONFLICT(function_code,version) DO NOTHING""",
+                   ON CONFLICT(function_code,version) DO UPDATE SET
+                     stage=excluded.stage,name=excluded.name,description=excluded.description,
+                     handler=excluded.handler,purpose=excluded.purpose,
+                     parameter_schema=excluded.parameter_schema""",
                 (code, stage, name, description, code, purpose, schema, now, now),
             )

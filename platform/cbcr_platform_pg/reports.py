@@ -10,6 +10,7 @@ from typing import Any
 from uuid import UUID
 
 from .database import PostgreSQLDatabase, utc_now
+from .pdf_reports import lineage_pdf, selected_cases_pdf
 
 
 class CaseReportError(ValueError):
@@ -350,6 +351,9 @@ class CaseReportService:
             )
         return stream.getvalue()
 
+    def selected_cases_pdf(self, case_set_id: str) -> bytes:
+        return selected_cases_pdf(self.selected_cases(case_set_id))
+
     def lineage_csv(self, case_set_id: str) -> str:
         report = self.lineage(case_set_id)
         stream = StringIO()
@@ -426,3 +430,6 @@ class CaseReportService:
                 }
             )
         return stream.getvalue()
+
+    def lineage_pdf(self, case_set_id: str) -> bytes:
+        return lineage_pdf(self.lineage(case_set_id))

@@ -1,0 +1,165 @@
+.report-controls {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.report-controls label {
+  display: grid;
+  gap: 5px;
+  min-width: 300px;
+  flex: 1;
+  font: 11px var(--mono);
+  color: var(--steel);
+  text-transform: uppercase;
+}
+
+.report-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 20px;
+  border-bottom: 3px double var(--ink);
+  padding-bottom: 14px;
+  margin-bottom: 16px;
+}
+
+.report-heading h2 {
+  font-size: 28px;
+  text-transform: uppercase;
+}
+
+.report-heading p {
+  margin: 5px 0;
+  color: var(--steel);
+}
+
+.report-id {
+  text-align: right;
+  max-width: 48%;
+}
+
+.report-id span {
+  display: block;
+  color: var(--steel);
+  font: 10px var(--mono);
+  text-transform: uppercase;
+}
+
+.report-id code {
+  display: block;
+  overflow-wrap: anywhere;
+  font: 11px var(--mono);
+}
+
+.lineage-rail {
+  display: flex;
+  gap: 9px;
+  overflow-x: auto;
+  margin: 12px 0 24px;
+}
+
+.lineage-node {
+  position: relative;
+  min-width: 220px;
+  border: 1px solid var(--line);
+  border-top: 5px solid var(--navy);
+  background: var(--paper);
+  padding: 12px;
+}
+
+.lineage-node:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  right: -9px;
+  top: 40%;
+  z-index: 1;
+  color: var(--red);
+  font-weight: 700;
+}
+
+.lineage-node span,
+.lineage-node code,
+.lineage-node small {
+  display: block;
+}
+
+.lineage-node span {
+  font: 700 11px var(--mono);
+  text-transform: uppercase;
+}
+
+.lineage-node code {
+  margin: 7px 0;
+  font: 10px var(--mono);
+  overflow-wrap: anywhere;
+}
+
+.lineage-node small {
+  color: var(--steel);
+}
+
+.report-json {
+  margin: 0;
+  max-width: 420px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: 10px/1.35 var(--mono);
+}
+
+@media (max-width: 780px) {
+  .report-controls {
+    align-items: stretch;
+  }
+
+  .report-controls label {
+    min-width: 100%;
+  }
+
+  .report-heading {
+    display: block;
+  }
+
+  .report-id {
+    max-width: 100%;
+    text-align: left;
+    margin-top: 12px;
+  }
+}
+
+@media print {
+  .masthead,
+  .sidebar,
+  #reports > .title-row,
+  .report-controls,
+  #toast {
+    display: none !important;
+  }
+
+  .layout,
+  main {
+    display: block;
+    max-width: none;
+    padding: 0;
+  }
+
+  .view {
+    display: none !important;
+  }
+
+  #reports.view {
+    display: block !important;
+  }
+
+  .report-sheet {
+    box-shadow: none;
+    break-after: page;
+    margin: 0;
+    border: 0;
+  }
+
+  .table-wrap {
+    overflow: visible;
+  }
+}

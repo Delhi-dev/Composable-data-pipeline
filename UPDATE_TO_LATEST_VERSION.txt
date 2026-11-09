@@ -1,0 +1,156 @@
+CBCR PIPELINE - UPDATE AN EXISTING LOCAL INSTALLATION TO THE LATEST VERSION
+============================================================================
+
+Purpose
+-------
+Use these steps when an earlier version of this repository is already installed
+locally and already works with the local PostgreSQL database named cbcr.
+
+The code update does not require the existing database or data to be deleted.
+Database migration 011 must be applied once after pulling the new code.
+
+
+1. OPEN POWERSHELL IN THE EXISTING REPOSITORY
+---------------------------------------------
+
+Replace the following path if your repository is stored elsewhere:
+
+Set-Location -LiteralPath "C:\path\to\Composable-data-pipeline"
+
+
+2. CHECK FOR UNCOMMITTED LOCAL CHANGES
+--------------------------------------
+
+git status
+
+If modified or untracked files are shown, commit or stash the work before
+continuing. Do not continue with the pull until any important local changes
+have been preserved.
+
+Optional commands to temporarily preserve uncommitted changes:
+
+git stash push -u -m "Before CbCR latest-version upgrade"
+
+
+3. DOWNLOAD THE LATEST MAIN-BRANCH CODE
+---------------------------------------
+
+git switch main
+git pull --ff-only origin main
+git rev-parse --short HEAD
+
+At the time this guide was prepared, the expected commit was:
+
+4502559
+
+A later commit is also acceptable if main has subsequently been updated.
+
+
+4. ACTIVATE THE EXISTING PYTHON VIRTUAL ENVIRONMENT, IF ONE IS USED
+-------------------------------------------------------------------
+
+Example for a virtual environment named .venv:
+
+.\.venv\Scripts\Activate.ps1
+
+Skip this command if the application was intentionally installed without a
+virtual environment.
+
+
+5. REFRESH THE PYTHON PACKAGES
+------------------------------
+
+python -m pip install -r platform\requirements.txt
+
+
+6. SET THE POSTGRESQL MIGRATION CONNECTION FOR THIS POWERSHELL WINDOW
+------------------------------------------------------------------------
+
+$env:CBCR_PG_HOST = "localhost"
+$env:CBCR_PG_PORT = "5432"
+$env:CBCR_PG_DATABASE = "cbcr"
+$env:CBCR_PG_MIGRATION_USER = "postgres"
+$env:CBCR_PG_MIGRATION_PASSWORD = Read-Host "PostgreSQL migration-user password"
+
+If a different PostgreSQL role performs migrations, replace "postgres" with
+that role. It must have permission to create and alter the required objects.
+
+
+7. APPLY ONLY THE VERSION-2 DATABASE MIGRATION
+----------------------------------------------
+
+python platform\tools\pg_apply_migrations.py `
+  --from 011 `
+  --through 011 `
+  --database cbcr `
+  --confirm-database cbcr
+
+The first successful upgrade should report:
+
+APPLY 011_risk_case_provenance.sql
+
+If it was already applied, the safe expected result is:
+
+SKIP 011_risk_case_provenance.sql (already applied)
+
+Do not rerun migrations 000 through 010 merely to perform this upgrade.
+
+
+8. OPTIONAL: CONFIRM MIGRATION 011 IN POSTGRESQL
+-----------------------------------------------
+
+Run this SQL in pgAdmin against the cbcr database:
+
+SELECT migration_id, description, applied_at
+FROM cbcr_control.schema_migration
+WHERE migration_id = '011_risk_case_provenance';
+
+One row should be returned.
+
+
+9. START THE UPDATED LOCAL APPLICATION
+--------------------------------------
+
+.\Start_Local_PostgreSQL.ps1
+
+The script asks for the cbcr_user application password if it is not already
+available in CBCR_SOURCE_DB_PASSWORD.
+
+The default URLs are:
+
+Application:  http://127.0.0.1:8000/
+Swagger API:  http://127.0.0.1:8000/docs
+
+
+10. VERIFY THAT THE LATEST VERSION IS RUNNING
+---------------------------------------------
+
+1. Hard-refresh the application using Ctrl+F5.
+2. Confirm that the left navigation contains "06 Final reports".
+3. Open Swagger and search for:
+
+   /api/v1/case-sets/{case_set_id}/reports/selected-cases
+
+4. Also confirm that this endpoint is present:
+
+   /api/v1/case-sets/{case_set_id}/reports/lineage
+
+The reports require a finalized case set before report contents can be
+generated, but the Final reports page and API definitions should be visible
+immediately.
+
+
+11. REMOVE THE MIGRATION PASSWORD FROM THE CURRENT SESSION (OPTIONAL)
+---------------------------------------------------------------------
+
+Remove-Item Env:CBCR_PG_MIGRATION_PASSWORD -ErrorAction SilentlyContinue
+
+
+IF GIT PULL DOES NOT WORK
+-------------------------
+
+If the repository has unrelated history, unresolved conflicts, or cannot be
+fast-forwarded, do not overwrite the existing installation. Clone main into a
+new folder, copy only the required local environment configuration, apply
+migration 011 to the same cbcr database, and test the new folder separately.
+

@@ -124,6 +124,10 @@ class RoleAssignment(BaseModel):
     role_ids: list[str]
 
 
+class UserStatusRequest(BaseModel):
+    active: bool
+
+
 class LotIngestRequest(BaseModel):
     source_id: str
     pipeline_profile_id: str = "ideal_separated"

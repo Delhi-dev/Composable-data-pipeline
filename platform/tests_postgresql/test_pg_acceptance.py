@@ -336,6 +336,22 @@ def test_approved_risk_runs_drive_final_audit_cases(pg_runtime, drain_queue, jou
     )
     assert cases_csv.status_code == 200 and "source_functions" in cases_csv.text
     assert lineage_csv.status_code == 200 and "function_code" in lineage_csv.text
+    cases_pdf = client.get(
+        f"/api/v1/case-sets/{case_set['case_set_id']}/reports/selected-cases.pdf",
+        headers={"X-CbCR-User": "auditor"},
+    )
+    lineage_pdf = client.get(
+        f"/api/v1/case-sets/{case_set['case_set_id']}/reports/lineage.pdf",
+        headers={"X-CbCR-User": "auditor"},
+    )
+    assert cases_pdf.status_code == 200
+    assert cases_pdf.headers["content-type"] == "application/pdf"
+    assert cases_pdf.content.startswith(b"%PDF-1.4")
+    assert b"Final selected cases" in cases_pdf.content
+    assert lineage_pdf.status_code == 200
+    assert lineage_pdf.headers["content-type"] == "application/pdf"
+    assert lineage_pdf.content.startswith(b"%PDF-1.4")
+    assert b"Lineage and execution trace" in lineage_pdf.content
     stored = container.db.one(
         "SELECT count(*)::int AS count FROM cbcr_selection.audit_case WHERE case_set_id=%s",
         (case_set["case_set_id"],),

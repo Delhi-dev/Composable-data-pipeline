@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="CbCR governed data-quality and risk-analysis control plane">
+  <title>CbCR Control Plane</title>
+  <link rel="stylesheet" href="/assets/redesign.css">
+</head>
+<body>
+  <a class="skip-link" href="#view">Skip to content</a>
+  <header id="masthead" class="masthead"></header>
+  <div class="app-shell">
+    <aside id="sidebar" class="sidebar" aria-label="Primary navigation"></aside>
+    <main id="view" tabindex="-1">
+      <div class="loading-state"><span class="spinner" aria-hidden="true"></span> Loading control plane…</div>
+    </main>
+  </div>
+  <div id="toast-region" class="toast-region" aria-live="polite"></div>
+  <div id="route-status" class="visually-hidden" aria-live="polite"></div>
+  <div id="dialog-region"></div>
+  <script type="module" src="/assets/app/main.js"></script>
+</body>
+</html>

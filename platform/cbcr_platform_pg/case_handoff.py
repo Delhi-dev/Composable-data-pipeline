@@ -167,13 +167,19 @@ class CaseHandoffService:
             )
         return self.case_set(case_set_id) or {}
 
-    def case_sets(self) -> list[dict[str, Any]]:
+    def case_sets(self, owner: str | None = None) -> list[dict[str, Any]]:
         rows = self.db.all(
-            """SELECT cs.*,sb.dataset_id,sb.dataset_version,sb.risk_result_set_id
+            """SELECT cs.*,sb.dataset_id,sb.dataset_version,sb.risk_result_set_id,
+                      l.external_lot_ref
                FROM cbcr_selection.case_set cs
                JOIN cbcr_selection.selection_batch sb
                  ON sb.selection_batch_id=cs.selection_batch_id
+               JOIN cbcr_control.dataset d
+                 ON d.dataset_id=sb.dataset_id AND d.version=sb.dataset_version
+               JOIN cbcr_control.lot l ON l.lot_id=d.lot_id
+               WHERE (%s IS NULL OR l.received_by=%s)
                ORDER BY cs.created_at DESC"""
+            , (owner, owner)
         )
         return [
             _string_ids(

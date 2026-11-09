@@ -143,16 +143,40 @@ class RiskResultSetService:
         row["runs"] = [_string_ids(item, ("run_id",)) for item in run_rows]
         return row
 
-    def list(self, dataset_id: str | None = None) -> list[dict[str, Any]]:
+    def list(
+        self, dataset_id: str | None = None, owner: str | None = None
+    ) -> list[dict[str, Any]]:
         rows = self.db.all(
-            """SELECT result_set_id,dataset_id,dataset_version,name,status,selection_policy,
-                      created_by,created_at,approved_by,approved_at
-               FROM cbcr_risk.result_set
-               WHERE (%s IS NULL OR dataset_id=%s)
-               ORDER BY created_at DESC""",
-            (dataset_id, dataset_id),
+            """SELECT rs.result_set_id,rs.dataset_id,rs.dataset_version,rs.name,
+                      rs.status,rs.selection_policy,rs.created_by,rs.created_at,
+                      rs.approved_by,rs.approved_at
+               FROM cbcr_risk.result_set rs
+               JOIN cbcr_control.dataset d
+                 ON d.dataset_id=rs.dataset_id AND d.version=rs.dataset_version
+               JOIN cbcr_control.lot l ON l.lot_id=d.lot_id
+               WHERE (%s IS NULL OR rs.dataset_id=%s)
+                 AND (%s IS NULL OR l.received_by=%s)
+               ORDER BY rs.created_at DESC""",
+            (dataset_id, dataset_id, owner, owner),
         )
-        return [_string_ids(row, ("result_set_id", "dataset_id")) for row in rows]
+        values: list[dict[str, Any]] = []
+        for row in rows:
+            _string_ids(row, ("result_set_id", "dataset_id"))
+            run_rows = self.db.all(
+                """SELECT rsr.run_id,r.selected_functions,r.completed_at,
+                          COUNT(rr.risk_result_id) AS result_count
+                   FROM cbcr_risk.result_set_run rsr
+                   JOIN cbcr_control.run r ON r.run_id=rsr.run_id
+                   LEFT JOIN cbcr_risk.result rr ON rr.run_id=r.run_id
+                   WHERE rsr.result_set_id=%s
+                   GROUP BY rsr.run_id,r.run_id,r.selected_functions,r.completed_at
+                   ORDER BY r.completed_at,r.run_id""",
+                (row["result_set_id"],),
+            )
+            row["runs"] = [_string_ids(item, ("run_id",)) for item in run_rows]
+            row["run_ids"] = [item["run_id"] for item in row["runs"]]
+            values.append(row)
+        return values
 
     def validate_approved(self, result_set_id: str, dataset_id: str, version: int) -> dict[str, Any]:
         row = self.db.one(

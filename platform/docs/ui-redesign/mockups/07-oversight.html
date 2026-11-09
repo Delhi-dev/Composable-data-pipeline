@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Oversight · CbCR Workbench (mockup)</title>
+  <link rel="stylesheet" href="base-niche.css">
+  <link rel="stylesheet" href="base-wip.css">
+  <link rel="stylesheet" href="base-reports.css">
+  <link rel="stylesheet" href="redesign.css">
+</head>
+<body class="wip" data-page="oversight" data-default-persona="auditor">
+  <header class="masthead" id="masthead"></header>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="Application navigation"></aside>
+    <main data-tabgroup>
+      <div class="mock-note"><b>Mockup 07 · Oversight</b> (brief §7.9; replaces "Lineage &amp; audit"). Visible to Auditor and Administrator. Two tabs with <i>independent</i> selectors — nothing depends on what was opened on another page. "Denied" is explained next to the filter so it is never confused with a case decision.</div>
+
+      <div class="title-row">
+        <div><p class="kicker">Traceability and access control</p><h1>Oversight</h1><p class="lede">Trace any dataset, run, case set or audit case end to end, and review who did what in the application.</p></div>
+      </div>
+
+      <div class="workspace-tabs" role="tablist">
+        <button class="active" data-tab="lineage" role="tab">Data and case lineage</button>
+        <button data-tab="audit" role="tab">Access and action audit</button>
+      </div>
+
+      <!-- ===== Lineage ===== -->
+      <section id="tab-lineage" class="workspace-tab active">
+        <section class="panel">
+          <div class="lookup">
+            <label>Look up by<select><option>Audit case ID</option><option>Case set ID</option><option>Dataset ID</option><option>Lot ID / external reference</option><option>Run ID</option><option>Report ID</option><option>Entity ID</option></select></label>
+            <label>Identifier<input value="ac01ac01-1111-4222-8333-444455556666"></label>
+            <button class="command">TRACE</button>
+          </div>
+          <p class="muted" style="margin:10px 0 0;font-size:12px">Deep links work too: <code>/oversight/lineage?case=ac01ac01…</code>, <code>?dataset=…</code>, <code>?run=…</code>. Runs, datasets, reports and audit cases link here directly.</p>
+        </section>
+
+        <div class="dataset-banner" style="grid-template-columns:1.4fr 1fr 1fr 1fr">
+          <div><span>Audit handoff case</span><strong>CBC-IN-2024-00005 · Solara Energy Ltd (IE)</strong><span data-ids="ac01ac01-1111-4222-8333-444455556666" data-kind="audit case"></span></div>
+          <div><span>Status</span><strong><span class="status active">Handed off</span></strong><small class="muted">ext ref AUD-2026-0142</small></div>
+          <div><span>Final case set</span><strong>Audit handoff 2026-10-28</strong><span data-ids="4d4d4d4d-5e5e-4f6f-8a7a-8b8b9c9c0d0d" data-kind="case set"></span></div>
+          <div><span>Source document</span><strong>CbC XML message IN-2024-M-0917</strong><small class="muted">received 19 Oct 2026</small></div>
+        </div>
+
+        <section class="panel">
+          <div class="panel-head"><div><p class="kicker">End-to-end trace</p><h2>From XML to audit handoff</h2></div><a class="secondary" href="06-reports.html#lineage">FULL LINEAGE REPORT</a></div>
+          <div class="stepper" style="margin:0 0 14px">
+            <div class="step done clickable" data-step="l1"><strong>Source XML</strong><small>IN-2024-M-0917</small></div>
+            <div class="step done clickable" data-step="l2"><strong>Lot</strong><small>FY2024-Q1-batch-01</small></div>
+            <div class="step done clickable" data-step="l3"><strong>Landing → Canonical</strong><small>2 snapshots</small></div>
+            <div class="step done clickable" data-step="l4"><strong>DQ gate → DQ passed</strong><small>22 / 0</small></div>
+            <div class="step done clickable" data-step="l5"><strong>Risk ready</strong><small>1 risk run</small></div>
+            <div class="step done clickable" data-step="l6"><strong>Evidence → candidates</strong><small>14 candidates</small></div>
+            <div class="step done clickable" data-step="l7"><strong>Decision → handoff</strong><small>Selected 28 Oct</small></div>
+          </div>
+          <p class="muted" style="margin:0 0 10px;font-size:12px">Click a stage to expand its promotions, runs, functions, parameters, findings and user actions.</p>
+          <div class="timeline">
+            <div class="tl-item"><div class="tl-head"><span class="zone">Source</span><strong>XML message IN-2024-M-0917 parsed · 22 reports</strong><div class="right">19 Oct 2026 · ingestion<button class="chevron" data-toggle="next">›</button></div></div><div class="tl-body" hidden><dl class="kv"><dt>Message ref</dt><dd>IN-2024-M-0917</dd><dt>Preserved XML</dt><dd>cbcr_staging.xml_document #4471 (immutable)</dd><dt>Report</dt><dd>CBC-IN-2024-00005 · reporting entity Solara Group Holdings Ltd · period end 2024-03-31</dd></dl></div></div>
+            <div class="tl-item"><div class="tl-head"><span class="zone">Lot</span><strong>FY2024-Q1-batch-01 · received by a.sharma</strong><div class="right">20 Oct 09:30<button class="chevron" data-toggle="next">›</button></div></div><div class="tl-body" hidden><dl class="kv"><dt>Lot</dt><dd><span data-ids="5a5a5a5a-6b6b-4c7c-8d8d-9e9e0f0f1a1a" data-kind="lot"></span></dd><dt>Profile</dt><dd>combined_enrichment</dd><dt>Note</dt><dd>"Q1 reports, full set"</dd></dl></div></div>
+            <div class="tl-item"><div class="tl-head"><span class="zone">Landing → Canonical</span><strong>2 snapshots created · mapping local_pg_v1</strong><div class="right">20 Oct 09:31<button class="chevron" data-toggle="next">›</button></div></div><div class="tl-body" hidden><dl class="kv"><dt>Landing</dt><dd><span data-ids="6f6f6f6f-0a1b-4c2d-8e3f-4a5b6c7d8e9f" data-kind="dataset"></span> v1</dd><dt>Canonical</dt><dd><span data-ids="7a7a7a7a-1b2c-4d3e-9f40-5b6c7d8e9f0a" data-kind="dataset"></span> v1</dd></dl></div></div>
+            <div class="tl-item zone-dq_passed"><div class="tl-head"><span class="zone">DQ gate</span><strong>Run 11aa22bb… (3 functions) → 22 eligible / 0 rejected → DQ passed v1</strong><div class="right">21 Oct 10:12 · a.sharma<button class="chevron" data-toggle="next">›</button></div></div><div class="tl-body" hidden><p>Findings on this report: 1 warning (RPT_SHARE_ABOVE_THRESHOLD, not blocking).</p><a class="text-button" href="04-runs.html">OPEN RUN →</a></div></div>
+            <div class="tl-item zone-risk_ready"><div class="tl-head"><span class="zone">Risk ready</span><strong>Published unchanged · risk run 66aa55bb… · PROFIT_PRESENCE_MISMATCH (high)</strong><div class="right">22 Oct<button class="chevron" data-toggle="next">›</button></div></div><div class="tl-body" hidden><dl class="kv"><dt>Function</dt><dd>analyze_profit_presence_mismatch v1 · employee_floor 10 · profit_margin_cap 0.35</dd><dt>Evidence</dt><dd>profit before tax 142m · employees 4 · margin 0.91</dd></dl></div></div>
+            <div class="tl-item decision"><div class="tl-head"><span class="zone">Evidence → candidates</span><strong>Evidence set "Q1 risk evidence 2026-10-22" approved by r.mehta → batch of 14 candidates</strong><div class="right">22–23 Oct<button class="chevron" data-toggle="next">›</button></div></div><div class="tl-body" hidden><dl class="kv"><dt>Approval rationale</dt><dd>Both screens complete; approved for candidate generation.</dd><dt>Candidate</dt><dd>score 0.90 · reason PROFIT_PRESENCE_MISMATCH</dd></dl></div></div>
+            <div class="tl-item decision"><div class="tl-head"><span class="zone">Decision → handoff</span><strong>Selected by r.mehta · case set finalised · handed off with AUD-2026-0142</strong><div class="right">28–29 Oct<button class="chevron" data-toggle="next">›</button></div></div><div class="tl-body"><dl class="kv"><dt>Decision</dt><dd>Selected for audit handoff — "High margin with 4 employees; refer." · r.mehta · 28 Oct 15:58</dd><dt>Finalisation</dt><dd>Audit handoff 2026-10-28 · r.mehta · 28 Oct 16:20 · "Human review completed"</dd><dt>Case events</dt><dd>created 28 Oct 16:20 → handed off 29 Oct 09:05 (demo) · external reference AUD-2026-0142</dd></dl><details class="tech-details"><summary>Technical details</summary><pre>{"decision_history":[{"decision":"selected","by":"r.mehta","at":"2026-10-28T15:58:11Z"}],"audit_case_events":[{"status":"created","at":"2026-10-28T16:20:04Z"},{"status":"handed_off","at":"2026-10-29T09:05:40Z","external_reference":"AUD-2026-0142"}]}</pre></details></div></div>
+          </div>
+        </section>
+      </section>
+
+      <!-- ===== Access and action audit ===== -->
+      <section id="tab-audit" class="workspace-tab">
+        <section class="panel filter-bar" aria-label="Audit filters">
+          <label>Period<select><option>Last 7 days</option><option>Today</option><option>Last 30 days</option><option>Custom…</option></select></label>
+          <label>Actor<input placeholder="user id"></label>
+          <label>Role<select><option>Any</option><option>platform_admin</option><option>dq_analyst</option><option>risk_analyst</option><option>case_manager</option><option>auditor</option></select></label>
+          <label>Action<select><option>Any</option><option>run_function</option><option>promote_dataset</option><option>approve_risk_result_set</option><option>record_decision</option><option>finalize_batch</option><option>view_audit</option><option>manage_sources</option></select></label>
+          <label>Outcome <span class="help" title="Allowed = the application permitted the attempted action. Denied = the application refused the attempt under access control. This is NOT a case-selection decision.">i</span><div class="segmented"><button type="button" class="active">All</button><button type="button">Allowed</button><button type="button">Denied</button></div></label>
+          <label>Target type<select><option>Any</option><option>dataset</option><option>run</option><option>risk_result_set</option><option>selection_batch</option><option>case_set</option><option>source</option><option>user</option></select></label>
+          <label class="grow">Target reference<input placeholder="Paste any ID"></label>
+          <div class="actions"><button class="secondary" data-toast="Exporting audit events (CSV) for the current filters.">EXPORT CSV</button><button class="command">APPLY</button></div>
+          <div class="decision-legend"><span><span class="status allowed">Allowed</span> the action was permitted and executed</span><span><span class="status denied">Denied</span> the action was refused by access control — not a case outcome</span><span class="chip url">URL: /oversight/audit?period=7d</span></div>
+        </section>
+        <div class="table-wrap"><table class="data-table">
+          <thead><tr><th class="w-status">Outcome</th><th class="sort desc nowrap">Time</th><th>Actor · role</th><th>Action</th><th>Target</th><th>Stage / purpose</th><th>Request</th></tr></thead>
+          <tbody>
+            <tr><td><span class="status allowed">Allowed</span></td><td class="nowrap">Today 15:58:02</td><td>a.sharma · dq_analyst</td><td>run_function</td><td>dataset <span data-ids="d0f3a9b2-7e6c-4c1d-b8a5-2f4e9d1c0b77" data-kind="dataset"></span></td><td>dq_passed · data_quality</td><td><code>req-7f3a</code></td></tr>
+            <tr><td><span class="status denied">Denied</span></td><td class="nowrap">Today 15:52:40</td><td>a.sharma · dq_analyst</td><td>approve_risk_result_set</td><td>risk_result_set <span data-ids="a5a5a5a5-6b6b-4c7c-8d8d-9e9e0f0f1a1a" data-kind="evidence set"></span></td><td>risk_ready · case_review</td><td><code>req-7f21</code></td></tr>
+            <tr><td><span class="status allowed">Allowed</span></td><td class="nowrap">Today 15:41:03</td><td>a.sharma · dq_analyst</td><td>run_function</td><td>dataset <span data-ids="5f607182-93a4-4b5c-d6e7-f8091a2b3c4d" data-kind="dataset"></span></td><td>canonical · data_quality</td><td><code>req-7e90</code></td></tr>
+            <tr><td><span class="status allowed">Allowed</span></td><td class="nowrap">Today 11:02:17</td><td>a.sharma · dq_analyst</td><td>promote_dataset</td><td>dataset <span data-ids="294835a6-0c7d-4e8f-a1b2-c3d4e5f60718" data-kind="dataset"></span> → dq_passed</td><td>canonical → dq_passed</td><td><code>req-7c15</code></td></tr>
+            <tr><td><span class="status denied">Denied</span></td><td class="nowrap">Yesterday 18:44:51</td><td>r.mehta · case_manager</td><td>manage_sources</td><td>source local_cbcr_postgresql</td><td>—</td><td><code>req-6b02</code></td></tr>
+            <tr><td><span class="status allowed">Allowed</span></td><td class="nowrap">Yesterday 18:40:12</td><td>r.mehta · case_manager</td><td>record_decision</td><td>candidate <span data-ids="cc11cc11-2222-4333-8444-555566667777" data-kind="candidate"></span></td><td>risk_ready · case_review</td><td><code>req-6a77</code></td></tr>
+            <tr><td><span class="status allowed">Allowed</span></td><td class="nowrap">5 Nov 09:10:33</td><td>r.mehta · case_manager</td><td>approve_risk_result_set</td><td>risk_result_set <span data-ids="a5a5a5a5-6b6b-4c7c-8d8d-9e9e0f0f1a1a" data-kind="evidence set"></span></td><td>risk_ready · case_review</td><td><code>req-5d19</code></td></tr>
+            <tr><td><span class="status allowed">Allowed</span></td><td class="nowrap">5 Nov 08:30:05</td><td>auditor · auditor</td><td>view_audit</td><td>audit log</td><td>—</td><td><code>req-5c01</code></td></tr>
+          </tbody></table></div>
+        <div class="pager"><span>Showing 1–8 of 126 events · newest first · read-only</span><div class="pages"><button class="active">1</button><button>2</button><button>3</button><button>…</button><button>16</button></div></div>
+      </section>
+    </main>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="mock.js"></script>
+</body>
+</html>

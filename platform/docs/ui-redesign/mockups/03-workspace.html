@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dataset workspace · CbCR Workbench (mockup)</title>
+  <link rel="stylesheet" href="base-niche.css">
+  <link rel="stylesheet" href="base-wip.css">
+  <link rel="stylesheet" href="base-reports.css">
+  <link rel="stylesheet" href="redesign.css">
+</head>
+<body class="wip" data-page="lifecycle" data-default-persona="analyst">
+  <header class="masthead" id="masthead"></header>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="Application navigation"></aside>
+    <main data-tabgroup>
+      <div class="mock-note"><b>Mockup 03 · Dataset workspace</b> (brief §7.5). Not a navigation entry: it opens from a lot stage, a run, a case or a search result at a routed URL such as <code>/datasets/d0f3a9b2…/v1/overview</code>. Tabs are hash-routed in this mock (try <code>#functions</code>, <code>#publish</code>). The publication tab is renamed per zone; the DQ-gate variant for Canonical snapshots is shown at the bottom.</div>
+
+      <nav class="breadcrumb" aria-label="Breadcrumb"><a href="02-lifecycle.html">Data lifecycle</a><span class="sep">›</span><a href="02-lifecycle.html">FY2024-Q3-batch-03</a><span class="sep">›</span><strong>DQ passed · v1</strong></nav>
+
+      <div class="dataset-banner" id="datasetBanner">
+        <div><span>Lot</span><strong>FY2024-Q3-batch-03</strong><span data-ids="7c2e9f41-5b8a-4d2e-9a7f-3c1d8e6b2a90" data-kind="lot"></span></div>
+        <div><span>Dataset</span><strong>DQ passed · v1 <span class="status published">Published</span></strong><span data-ids="d0f3a9b2-7e6c-4c1d-b8a5-2f4e9d1c0b77" data-kind="dataset"></span></div>
+        <div><span>Parent snapshot</span><strong>Canonical · v1</strong><span data-ids="294835a6-0c7d-4e8f-a1b2-c3d4e5f60718" data-kind="dataset"></span></div>
+        <div><span>Created</span><strong>4 Nov 2026 11:02</strong><small class="muted">by a.sharma · gate run ab12cd34…</small></div>
+        <div><span>Reports</span><strong>10</strong><small class="muted">2 rejected at DQ gate</small></div>
+      </div>
+
+      <div class="stepper banner-stepper" aria-label="Pipeline stage">
+        <div class="step done"><strong>Landing</strong><small>v1 · 12 reports</small></div>
+        <div class="step done"><strong>Canonical</strong><small>v1 · 12 reports · DQ run completed</small></div>
+        <div class="step current"><strong>DQ passed</strong><small>v1 · 10 reports · you are here</small></div>
+        <div class="step future"><strong>Enriched</strong><small>Next · optional facts, then publish</small></div>
+        <div class="step future"><strong>Risk ready</strong><small>Final analytical snapshot</small></div>
+      </div>
+
+      <div class="workspace-tabs" id="workspaceTabs" role="tablist">
+        <button class="active" data-tab="overview" role="tab">Overview</button>
+        <button data-tab="data" role="tab">Data</button>
+        <button data-tab="functions" role="tab">Run functions</button>
+        <button data-tab="results" role="tab">Results <span class="nav-badge" style="float:none;margin-left:4px">1</span></button>
+        <button data-tab="publish" role="tab">Enrich &amp; publish</button>
+        <div class="overflow"><button data-menu="wsOverflow" aria-haspopup="true" aria-expanded="false">More ▾</button>
+          <div class="menu" id="wsOverflow" hidden>
+            <button class="menu-item" data-tab="lineage">View lineage</button>
+            <button class="menu-item" data-tab="technical">Technical details</button>
+            <div class="menu-sep"></div>
+            <a href="04-runs.html?dataset=d0f3a9b2">All runs for this dataset in Run history</a>
+            <a href="#advanced">Open in Advanced operations</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Overview ===== -->
+      <section id="tab-overview" class="workspace-tab active">
+        <div class="metric-grid">
+          <article class="metric"><span>Reports</span><strong>10</strong></article>
+          <article class="metric"><span>Constituent entities</span><strong>84</strong></article>
+          <article class="metric"><span>Metrics</span><strong>412</strong></article>
+          <article class="metric"><span>Next governed move</span><strong>Enriched</strong></article>
+        </div>
+        <div class="next-action">
+          <div>
+            <p class="kicker">Recommended next action</p>
+            <h2>Enrich and publish → Enriched snapshot</h2>
+            <p>Add governed enrichment facts (optional) and publish the next immutable snapshot. This snapshot stays unchanged as the parent.</p>
+            <ul class="checklist">
+              <li class="ok">DQ passed snapshot is published</li>
+              <li class="ok">No running runs on this snapshot</li>
+              <li>1 queued run (resolve_entity) — publishing now is allowed; its results will refer to this snapshot, not the new one</li>
+            </ul>
+          </div>
+          <div style="display:grid;gap:8px"><button class="command" data-tab="publish">ENRICH &amp; PUBLISH</button><button class="secondary" data-tab="functions">RUN FUNCTIONS FIRST</button></div>
+        </div>
+        <div class="info-grid" style="margin-top:18px">
+          <section class="panel"><p class="kicker">Operating context</p><h2>DQ passed snapshot</h2><p>Only records allowed through the DQ gate on 4 Nov (blocking severity: error). Two reports were rejected: <code>CBC-IN-2024-00004</code>, <code>CBC-IN-2024-00009</code>. <a href="04-runs.html#ab12cd34">See gate run</a>.</p></section>
+          <section class="panel"><p class="kicker">Functions allowed here</p><h2>Stages 03–04</h2><p>Entity resolution and jurisdiction enrichment are recommended before publication; completeness checks are optional re-checks.</p><button class="secondary" data-tab="functions">OPEN RUN FUNCTIONS</button></section>
+        </div>
+      </section>
+
+      <!-- ===== Data ===== -->
+      <section id="tab-data" class="workspace-tab">
+        <section class="panel">
+          <div class="panel-head"><div><p class="kicker">Snapshot records</p><h2>Reports, entities and metrics</h2></div><button class="secondary" data-roles="platform_admin auditor">EXPORT CSV</button></div>
+          <div class="filter-bar" style="margin-bottom:12px">
+            <label class="grow">Find<input placeholder="Report ID or reporting entity"></label>
+            <label>Jurisdiction<select><option>Any</option><option>IN</option><option>IE</option><option>NL</option><option>SG</option></select></label>
+            <label>Period end<select><option>Any</option><option>2024-03-31</option><option>2024-12-31</option></select></label>
+            <label>Show fields<select><option>Canonical</option><option>Source (Landing)</option><option>Enrichment facts</option></select></label>
+          </div>
+          <div class="table-wrap"><table class="data-table">
+            <thead><tr><th class="w-actions"></th><th>Report</th><th>Reporting entity</th><th>Entity ID</th><th class="sort desc">Period end</th><th class="num">Constituents</th><th class="num">Metrics</th><th>Gate</th></tr></thead>
+            <tbody>
+              <tr class="summary open"><td><button class="chevron" aria-label="Expand">›</button></td><td><code>CBC-IN-2024-00017</code></td><td>Northfield Holdings Ltd</td><td><code>IN-NFH-001</code></td><td>2024-03-31</td><td class="num">11</td><td class="num">52</td><td><span class="status completed">Eligible</span></td></tr>
+              <tr class="row-detail"><td colspan="8">
+                <div class="detail-head"><h3>CBC-IN-2024-00017 · constituent entities</h3><button class="chevron" data-toggle="next" aria-label="Collapse">×</button></div>
+                <div class="table-wrap"><table>
+                  <thead><tr><th>Entity</th><th>Jurisdiction</th><th class="num">Revenue (unrelated)</th><th class="num">Revenue (related)</th><th class="num">Profit before tax</th><th class="num">Tax paid</th><th class="num">Employees</th><th>Field origin</th></tr></thead>
+                  <tbody>
+                    <tr><td>Northfield Holdings Ltd</td><td>IN</td><td class="num">1,240,000,000</td><td class="num">85,000,000</td><td class="num">210,000,000</td><td class="num">61,000,000</td><td class="num">1,240</td><td><span class="status">Canonical</span></td></tr>
+                    <tr><td>Northfield Finance DAC</td><td>IE</td><td class="num">0</td><td class="num">410,000,000</td><td class="num">380,000,000</td><td class="num">4,200,000</td><td class="num">6</td><td><span class="status">Canonical</span></td></tr>
+                    <tr><td>Northfield Trading Pte</td><td>SG</td><td class="num">310,000,000</td><td class="num">22,000,000</td><td class="num">48,000,000</td><td class="num">7,900,000</td><td class="num">41</td><td><span class="status">Canonical</span></td></tr>
+                  </tbody></table></div>
+                <small class="muted">Showing 3 of 11 entities · <a href="#">view all</a></small>
+              </td></tr>
+              <tr class="summary"><td><button class="chevron" aria-label="Expand">›</button></td><td><code>CBC-IN-2024-00018</code></td><td>Amberline Group plc</td><td><code>IN-AMB-002</code></td><td>2024-03-31</td><td class="num">9</td><td class="num">44</td><td><span class="status completed">Eligible</span></td></tr>
+              <tr class="row-detail" hidden><td colspan="8"><div class="empty-state"><strong>Entities load on demand</strong><p>Expanding a report fetches its constituent entities and key metrics from the server.</p></div></td></tr>
+              <tr class="summary"><td><button class="chevron" aria-label="Expand">›</button></td><td><code>CBC-IN-2024-00021</code></td><td>Kesari Industries Ltd</td><td><code>IN-KSR-005</code></td><td>2024-03-31</td><td class="num">6</td><td class="num">30</td><td><span class="status completed">Eligible</span></td></tr>
+              <tr class="row-detail" hidden><td colspan="8"></td></tr>
+              <tr class="summary"><td><button class="chevron" aria-label="Expand">›</button></td><td><code>CBC-IN-2024-00023</code></td><td>Varuna Shipping Co Ltd</td><td><code>IN-VSC-007</code></td><td>2024-03-31</td><td class="num">8</td><td class="num">39</td><td><span class="status completed">Eligible</span></td></tr>
+              <tr class="row-detail" hidden><td colspan="8"></td></tr>
+            </tbody></table></div>
+          <div class="pager"><span>10 reports · 25 per page</span><div class="pages"><button class="active">1</button></div></div>
+        </section>
+      </section>
+
+      <!-- ===== Run functions ===== -->
+      <section id="tab-functions" class="workspace-tab">
+        <section class="panel">
+          <div class="panel-head"><div><p class="kicker">DQ passed · stages 03–04</p><h2>Run functions on this snapshot</h2></div><span class="muted">4 available · <a class="ref" href="09-function-reference.html">Function reference</a></span></div>
+          <div class="callout"><strong>How runs work</strong>Each selected function executes independently inside one asynchronous run. Functions in one run must share a purpose; the other purpose is disabled as soon as you tick a box.</div>
+
+          <div class="function-group"><h3>Recommended for this stage</h3><span class="muted">Usually run before publishing the Enriched snapshot</span></div>
+          <div class="function-grid">
+            <article class="function-card" data-purpose="data_quality">
+              <header><input type="checkbox" aria-label="Select Resolve entity"><div><span class="zone">Stage 03 · Data quality</span><h3>Resolve entity <span class="help" title="Matches each constituent entity to the domestic entity register using identifiers and name similarity. Output: resolved entity references and unresolved-entity findings.">i</span></h3></div></header>
+              <p>Matches constituent entities to the domestic register. Produces resolved references and flags entities that cannot be matched.</p>
+              <div class="reason" hidden>Unavailable: a different purpose is already selected in this run.</div>
+              <button type="button" class="toggle-params" data-toggle="#p-resolve">SHOW PARAMETERS (2)</button>
+              <div class="parameter-grid" id="p-resolve" hidden>
+                <label>Match confidence floor<input type="number" value="0.85" step="0.01" min="0" max="1"><span class="hint muted">Below this, an entity is reported as unresolved.</span></label>
+                <label>Preset<select><option>Defaults</option><option>Strict (0.95)</option><option>Lenient (0.70)</option></select></label>
+                <button type="button" class="text-button">RESET TO DEFAULTS</button>
+              </div>
+              <a class="ref" href="09-function-reference.html#resolve_entity">Reference ↗</a>
+            </article>
+            <article class="function-card" data-purpose="data_quality">
+              <header><input type="checkbox" aria-label="Select Enrich jurisdiction"><div><span class="zone">Stage 03 · Data quality</span><h3>Enrich jurisdiction reference <span class="help" title="Adds reference attributes for each jurisdiction (treaty status, nominal rate). Output: reference facts; no findings unless a jurisdiction code is unknown.">i</span></h3></div></header>
+              <p>Attaches jurisdiction reference attributes. Flags unknown jurisdiction codes.</p>
+              <div class="reason" hidden>Unavailable: a different purpose is already selected in this run.</div>
+              <span class="muted" style="font-size:12px">No parameters</span><br>
+              <a class="ref" href="09-function-reference.html#enrich_jurisdiction_reference">Reference ↗</a>
+            </article>
+          </div>
+
+          <div class="function-group"><h3>Advanced / optional</h3><span class="muted">Re-checks that were already applied at the DQ gate</span></div>
+          <div class="function-grid">
+            <article class="function-card" data-purpose="data_quality">
+              <header><input type="checkbox" aria-label="Select Check completeness"><div><span class="zone">Stage 04 · Data quality</span><h3>Check completeness</h3></div></header>
+              <p>Verifies mandatory CbCR fields are present per entity. Produces error/warning findings per report.</p>
+              <div class="reason" hidden>Unavailable: a different purpose is already selected in this run.</div>
+              <button type="button" class="toggle-params" data-toggle="#p-complete">SHOW PARAMETERS (1)</button>
+              <div class="parameter-grid" id="p-complete" hidden><label>Required fields<input value="revenue_unrelated,revenue_related,profit_before_tax,tax_paid,employees"></label></div>
+              <a class="ref" href="09-function-reference.html#check_completeness">Reference ↗</a>
+            </article>
+            <article class="function-card" data-purpose="data_quality">
+              <header><input type="checkbox" aria-label="Select Check related revenue share"><div><span class="zone">Stage 04 · Data quality</span><h3>Check related revenue share</h3></div></header>
+              <p>Flags entities whose related-party revenue share exceeds a threshold.</p>
+              <div class="reason" hidden>Unavailable: a different purpose is already selected in this run.</div>
+              <button type="button" class="toggle-params" data-toggle="#p-rpt">SHOW PARAMETERS (1)</button>
+              <div class="parameter-grid" id="p-rpt" hidden><label>Threshold (share)<input type="number" value="0.5" step="0.05"></label></div>
+              <a class="ref" href="09-function-reference.html#check_rpt_share_threshold">Reference ↗</a>
+            </article>
+          </div>
+
+          <div class="exec-summary" id="execSummary" hidden>
+            <h3>Before you queue</h3>
+            <dl class="kv" style="margin:0">
+              <dt>Dataset</dt><dd>FY2024-Q3-batch-03 · DQ passed v1 (<span data-ids="d0f3a9b2-7e6c-4c1d-b8a5-2f4e9d1c0b77" data-kind="dataset"></span>)</dd>
+              <dt>Scope</dt><dd>All 10 reports <button class="text-button">LIMIT TO SELECTED REPORTS…</button></dd>
+              <dt>Functions</dt><dd><ul id="execFunctions" style="margin:0;padding-left:18px"></ul></dd>
+              <dt>Parameters</dt><dd>Defaults unless changed above</dd>
+            </dl>
+          </div>
+          <div class="function-actions"><span id="functionSummary">0 selected · purpose: —</span><button class="command" data-toast="Run queued. Track it under Results; you can leave this page and come back.">QUEUE RUN</button></div>
+        </section>
+      </section>
+
+      <!-- ===== Results ===== -->
+      <section id="tab-results" class="workspace-tab">
+        <section class="panel">
+          <div class="panel-head"><div><p class="kicker">Execution evidence</p><h2>Runs on this snapshot</h2></div><div class="filter-bar"><label>Status<select><option>All</option><option>Active</option><option>Completed</option><option>Failed</option></select></label><label>Submitted by<select><option>Anyone permitted</option><option>Me</option></select></label></div></div>
+          <p class="muted" style="margin-top:0">Loaded from the server for this dataset version — including runs submitted in earlier sessions or by other users you are permitted to see.</p>
+          <div class="run-list">
+            <article class="run-card">
+              <div class="top"><span class="status queued">Queued</span><span data-ids="6a7b8c9d-0e1f-4a2b-9c3d-4e5f6a7b8c9d" data-kind="run"></span><span class="meta">Data quality · resolve_entity · submitted 15:58 by a.sharma</span><div class="right"><span class="muted">position 1 in queue</span><button class="chevron" data-toggle="next" aria-label="Expand">›</button></div></div>
+              <div class="body" hidden><p>Waiting for a worker. You can leave this page; the result is kept against this snapshot.</p><button class="secondary" data-toast="Cancellation requested.">CANCEL RUN</button></div>
+            </article>
+            <article class="run-card">
+              <div class="top"><span class="status completed">Completed</span><span data-ids="2b3c4d5e-6f70-4819-a2b3-c4d5e6f70819" data-kind="run"></span><span class="meta">Data quality · enrich_jurisdiction_reference · 11:20 → 11:21 (48 s) · a.sharma</span><div class="right"><span class="status completed">No findings</span><button class="chevron" data-toggle="next" aria-label="Expand">›</button></div></div>
+              <div class="body">
+                <div class="callout ok" style="margin-top:0"><strong>Clean result</strong>The function completed on all 10 reports and produced no findings. This is a successful outcome, not an empty one.</div>
+                <div class="child-grid">
+                  <article class="child-card"><span class="zone">Stage 03</span><strong>Enrich jurisdiction reference</strong> <span class="status completed">Completed</span><dl class="kv"><dt>Reports</dt><dd>10 processed</dd><dt>Jurisdictions</dt><dd>7 enriched · 0 unknown</dd><dt>Duration</dt><dd>48 s</dd></dl></article>
+                </div>
+                <div class="row-actions" style="margin-top:10px"><button class="secondary" data-tab="publish">USE IN ENRICH &amp; PUBLISH</button><a class="secondary" href="07-oversight.html?run=2b3c4d5e">VIEW LINEAGE</a></div>
+                <details class="tech-details"><summary>Technical details (raw result JSON)</summary><pre>{"function_code":"enrich_jurisdiction_reference","function_version":1,"result_summary":{"reports":10,"jurisdictions_enriched":7,"unknown_codes":[]}}</pre></details>
+              </div>
+            </article>
+          </div>
+          <div class="pager"><span>2 runs on this snapshot</span><a class="text-button" href="04-runs.html?dataset=d0f3a9b2">OPEN IN RUN HISTORY →</a></div>
+        </section>
+      </section>
+
+      <!-- ===== Enrich & publish (name changes per zone) ===== -->
+      <section id="tab-publish" class="workspace-tab">
+        <section class="panel">
+          <div class="panel-head"><div><p class="kicker">Governed publication · DQ passed → Enriched</p><h2>Enrich and publish</h2></div></div>
+          <div class="callout"><strong>What happens</strong>A new immutable <b>Enriched</b> snapshot is created with this snapshot as its parent. Enrichment facts are optional; the transition itself is required by the pipeline profile before Risk ready.</div>
+
+          <h3 style="margin:16px 0 8px">Enrichment facts (optional)</h3>
+          <div class="table-wrap"><table class="enrich-grid">
+            <thead><tr><th>Report</th><th>Scope</th><th>Attribute</th><th>Value</th><th>Source reference</th><th>Confidence</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><code>CBC-IN-2024-00017</code></td><td>Entity · Northfield Finance DAC</td><td><code>domestic_registry_status</code></td><td>active</td><td>demo-domestic-registry</td><td class="num">0.95</td><td><button class="text-button">EDIT</button> <button class="text-button" style="color:var(--red)">REMOVE</button></td></tr>
+              <tr><td><select><option>CBC-IN-2024-00017</option><option>CBC-IN-2024-00018</option></select></td><td><select><option>Report level</option><option>Entity…</option></select></td><td><input value="domestic_registry_status"></td><td><input placeholder="value"></td><td><input placeholder="source ref"></td><td><input type="number" value="0.95" step="0.01" min="0" max="1"></td><td><button class="secondary">ADD</button></td></tr>
+            </tbody></table></div>
+
+          <label style="display:grid;gap:5px;margin-top:14px;font:11px var(--mono);color:#4d5a53;text-transform:uppercase">Publication reason<input value="Governed enrichment publication"></label>
+          <div class="function-actions"><span>Both actions create a new immutable Enriched snapshot.</span><div style="display:flex;gap:8px"><button class="secondary" data-dialog="confirmPublish">PUBLISH UNCHANGED</button><button class="command" data-dialog="confirmPublish">ADD 1 FACT &amp; PUBLISH</button></div></div>
+        </section>
+      </section>
+
+      <!-- ===== Lineage (from overflow menu) ===== -->
+      <section id="tab-lineage" class="workspace-tab">
+        <section class="panel">
+          <div class="panel-head"><div><p class="kicker">Immutable provenance</p><h2>Lineage of this snapshot</h2></div><a class="secondary" href="07-oversight.html?dataset=d0f3a9b2">OPEN IN OVERSIGHT</a></div>
+          <div class="timeline">
+            <div class="tl-item"><div class="tl-head"><span class="zone">Landing</span><span data-ids="b41c7a02-3e5f-4d6a-9b8c-1f2e3d4c5b6a" data-kind="dataset"></span><span>Dataset created from source</span><div class="right">4 Nov 09:12 · a.sharma</div></div></div>
+            <div class="tl-item"><div class="tl-head"><span class="zone">Canonical</span><span data-ids="294835a6-0c7d-4e8f-a1b2-c3d4e5f60718" data-kind="dataset"></span><span>Mapped with local_pg_v1</span><div class="right">4 Nov 09:13 · 1 run</div></div></div>
+            <div class="tl-item zone-dq_passed"><div class="tl-head"><span class="zone">DQ passed</span><span data-ids="d0f3a9b2-7e6c-4c1d-b8a5-2f4e9d1c0b77" data-kind="dataset"></span><span>Promotion Canonical → DQ passed · 10 promoted · 2 rejected</span><div class="right">4 Nov 11:02 · gate run ab12cd34… <span class="status">current</span></div></div></div>
+          </div>
+        </section>
+      </section>
+
+      <!-- ===== Technical details (from overflow menu) ===== -->
+      <section id="tab-technical" class="workspace-tab">
+        <section class="panel"><div class="panel-head"><div><p class="kicker">For support and diagnostics</p><h2>Technical details</h2></div></div>
+          <dl class="kv"><dt>Dataset ID</dt><dd>d0f3a9b2-7e6c-4c1d-b8a5-2f4e9d1c0b77</dd><dt>Version</dt><dd>1</dd><dt>Zone</dt><dd>dq_passed</dd><dt>Pipeline profile</dt><dd>ideal_separated</dd><dt>Storage binding</dt><dd>cbcr_dq_published</dd><dt>Evaluation ID</dt><dd>7e7e7e7e-1111-4222-8333-944455556666</dd><dt>Blocking severities</dt><dd>error</dd></dl>
+        </section>
+      </section>
+
+      <!-- ===== Variant: Canonical snapshot's "Evaluate DQ gate" tab ===== -->
+      <hr style="margin:40px 0 20px;border:0;border-top:3px double var(--ink)">
+      <div class="mock-note"><b>Variant shown for reference</b> — the same tab when the snapshot is <b>Canonical</b>: it is named <b>Evaluate DQ gate</b>. Eligible runs are chosen from a list, blocking severities are explained, and the effect is previewed before publishing.</div>
+      <section class="panel">
+        <div class="panel-head"><div><p class="kicker">Governed publication · Canonical → DQ passed</p><h2>Evaluate DQ gate</h2></div></div>
+        <h3 style="margin:8px 0">1. Choose the completed DQ run that the gate evaluates</h3>
+        <div class="radio-stack">
+          <label class="selected"><input type="radio" name="gateRun" checked><span><span data-ids="ab12cd34-5e6f-4a7b-8c9d-0e1f2a3b4c5d" data-kind="run"></span> · completed 09:48 · 4 functions · <b>2 warnings, 0 errors</b><small>validate_receipt_identity, detect_duplicate_report, check_completeness, check_rpt_share_threshold · submitted by a.sharma</small></span></label>
+          <label><input type="radio" name="gateRun"><span><span data-ids="9c9c9c9c-2222-4333-8444-955566667777" data-kind="run"></span> · completed 3 Nov 18:10 · 2 functions · <b>1 error, 3 warnings</b><small>check_completeness, check_rpt_share_threshold · submitted by a.sharma</small></span></label>
+        </div>
+        <h3 style="margin:16px 0 8px">2. Blocking severities <span class="help" title="A report with at least one finding at a blocking severity is rejected by the gate and left out of the DQ-passed snapshot. Non-blocking findings are kept as evidence but do not exclude the report.">i</span></h3>
+        <div style="display:flex;gap:18px;font-size:13px"><label style="display:flex;gap:6px;align-items:center;text-transform:none;font:13px var(--sans)"><input type="checkbox" checked style="width:auto"> Error — rejects the report</label><label style="display:flex;gap:6px;align-items:center;text-transform:none;font:13px var(--sans)"><input type="checkbox" style="width:auto"> Warning — rejects the report</label></div>
+        <div class="function-actions"><span>Preview is computed from the selected run's findings only.</span><button class="command" data-toggle="#gateOut">EVALUATE GATE</button></div>
+        <div id="gateOut">
+          <h3 style="margin:16px 0 8px">3. Expected effect</h3>
+          <div class="gate-preview">
+            <article class="metric"><span>Eligible → DQ passed</span><strong>10</strong></article>
+            <article class="metric"><span>Rejected</span><strong style="color:var(--red)">2</strong></article>
+            <article class="metric"><span>Warnings kept as evidence</span><strong>2</strong></article>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Report</th><th>Disposition</th><th>Reason codes</th></tr></thead><tbody>
+            <tr><td><code>CBC-IN-2024-00004</code></td><td><span class="status rejected">Rejected</span></td><td>COMPLETENESS_MISSING_TAX_PAID (error)</td></tr>
+            <tr><td><code>CBC-IN-2024-00009</code></td><td><span class="status rejected">Rejected</span></td><td>DUPLICATE_BUSINESS_KEY (error)</td></tr>
+            <tr><td><code>CBC-IN-2024-00017</code></td><td><span class="status completed">Eligible</span></td><td>RPT_SHARE_ABOVE_THRESHOLD (warning, not blocking)</td></tr>
+            <tr><td colspan="3" class="muted">… 9 more eligible reports with no blocking findings</td></tr>
+          </tbody></table></div>
+          <div class="function-actions"><span>Publishing creates DQ passed v1 with 10 reports; the 2 rejected reports stay in Canonical and in the audit trail.</span><button class="command" data-dialog="confirmGate">PUBLISH DQ-PASSED</button></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Confirmation dialog pattern (brief §6.3, §8.7) -->
+  <dialog id="confirmPublish">
+    <form method="dialog">
+      <div class="dialog-head"><div><p class="kicker">Confirm publication</p><h2>Publish Enriched snapshot</h2></div><button value="cancel" class="icon-button" aria-label="Close">×</button></div>
+      <table class="summary-table"><tr><th>Source snapshot</th><td>DQ passed v1 · FY2024-Q3-batch-03</td></tr><tr><th>Target</th><td>Enriched v1 (new immutable dataset)</td></tr><tr><th>Reports</th><td>10 (unchanged)</td></tr><tr><th>Enrichment facts</th><td>1 fact on 1 entity</td></tr><tr><th>Lineage effect</th><td>DQ passed v1 becomes the parent; it is not modified</td></tr><tr><th>Reason</th><td>Governed enrichment publication</td></tr></table>
+      <div class="dialog-actions"><button value="cancel" class="secondary">CANCEL</button><button class="command" data-toast="Enriched snapshot published. Opening its workspace…">CONFIRM &amp; PUBLISH</button></div>
+    </form>
+  </dialog>
+  <dialog id="confirmGate">
+    <form method="dialog">
+      <div class="dialog-head"><div><p class="kicker">Confirm publication</p><h2>Publish DQ passed snapshot</h2></div><button value="cancel" class="icon-button" aria-label="Close">×</button></div>
+      <table class="summary-table"><tr><th>Gate run</th><td>ab12cd34… (completed 09:48)</td></tr><tr><th>Blocking</th><td>error</td></tr><tr><th>Eligible / rejected</th><td>10 / 2 reports</td></tr><tr><th>Target</th><td>DQ passed v1 (new immutable dataset)</td></tr></table>
+      <label>Publication reason<input value="DQ gate evaluated; errors blocking"></label>
+      <div class="dialog-actions"><button value="cancel" class="secondary">CANCEL</button><button class="command" data-toast="DQ passed snapshot published.">CONFIRM &amp; PUBLISH</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="mock.js"></script>
+</body>
+</html>

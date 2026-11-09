@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Case workbench · CbCR Workbench (mockup)</title>
+  <link rel="stylesheet" href="base-niche.css">
+  <link rel="stylesheet" href="base-wip.css">
+  <link rel="stylesheet" href="base-reports.css">
+  <link rel="stylesheet" href="redesign.css">
+</head>
+<body class="wip" data-page="cases" data-default-persona="reviewer">
+  <header class="masthead" id="masthead"></header>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="Application navigation"></aside>
+    <main>
+      <div class="mock-note"><b>Mockup 05 · Case workbench</b> (brief §7.7). Master–detail: the left list is one entry per risk-ready dataset with case work ("case pipeline"); the right side is a six-step guided flow for the selected pipeline. Steps are clickable (hash-routed: <code>#dataset</code> … <code>#finalize</code>). Candidate generation is a contextual action on the approved evidence set — no ID copying.</div>
+
+      <div class="title-row">
+        <div><p class="kicker">Risk-to-case boundary</p><h1>Case workbench</h1><p class="lede">Freeze the exact risk runs that count as evidence, generate candidates from them, record human decisions, then finalise an immutable case set for audit handoff.</p></div>
+        <button class="secondary">REFRESH</button>
+      </div>
+
+      <div class="master-detail">
+        <!-- ===== Master: case pipelines ===== -->
+        <aside class="master">
+          <section class="panel">
+            <div class="panel-head"><div><p class="kicker">Case pipelines</p><h2>Risk-ready datasets</h2></div></div>
+            <div class="filter-bar" style="margin-bottom:10px"><label style="min-width:0;flex:1">Show<select><option>With risk runs or case work</option><option>All risk-ready datasets</option><option>Needing my decision</option></select></label></div>
+            <div class="work-item selected" role="button" tabindex="0">
+              <strong>FY2024-Q2-batch-02 · Risk ready v1</strong>
+              <div class="progress"><i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i><i class="current"></i><i></i></div>
+              <small>Step 5 · Reviewing candidates · <b>5 of 12 pending</b> · owner r.mehta</small>
+            </div>
+            <div class="work-item" role="button" tabindex="0">
+              <strong>FY2024-Q1-batch-01 · Risk ready v1</strong>
+              <div class="progress"><i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i><i class="done"></i></div>
+              <small>Finalised 28 Oct · final case set "Audit handoff 2026-10-28" · 6 cases</small>
+            </div>
+            <div class="work-item" role="button" tabindex="0" style="opacity:.65">
+              <strong>FY2023-annual-batch-07 · Risk ready v2</strong>
+              <div class="progress"><i class="done"></i><i class="done"></i><i></i><i></i><i></i><i></i></div>
+              <small>Step 3 · Draft evidence set awaiting approval · owner a.sharma</small>
+            </div>
+            <div class="pager" style="padding:6px 0 0"><span>3 pipelines</span></div>
+          </section>
+          <section class="panel">
+            <p class="kicker">Glossary</p>
+            <dl class="kv" style="margin:6px 0 0">
+              <dt>Risk evidence set</dt><dd>The exact completed risk runs frozen as evidence. Draft → Approved. (API: risk-result set)</dd>
+              <dt>Selection batch</dt><dd>Candidates generated from one approved evidence set, awaiting human decisions.</dd>
+              <dt>Final case set</dt><dd>Immutable record of the candidates selected when a batch is finalised.</dd>
+              <dt>Audit handoff case</dt><dd>One durable case per selected candidate, worked outside this software.</dd>
+            </dl>
+          </section>
+        </aside>
+
+        <!-- ===== Detail: guided flow for the selected pipeline ===== -->
+        <section>
+          <div class="dataset-banner" style="grid-template-columns:1.4fr 1fr 1fr 1fr">
+            <div><span>Pipeline</span><strong>FY2024-Q2-batch-02 · Risk ready v1</strong><span data-ids="9f8b2c11-4d3e-4f5a-8b6c-7d8e9f0a1b2c" data-kind="dataset"></span></div>
+            <div><span>Reports</span><strong>18</strong></div>
+            <div><span>Evidence set</span><strong>Q2 risk evidence 2026-11-05 <span class="status completed">Approved</span></strong></div>
+            <div><span>Batch</span><strong><span class="status pending">Open</span> 12 candidates · 5 pending</strong></div>
+          </div>
+
+          <div class="stepper" aria-label="Case workflow">
+            <div class="step done clickable" data-step="dataset"><strong>Dataset</strong><small>Risk ready v1 chosen</small></div>
+            <div class="step done clickable" data-step="runs"><strong>Risk runs</strong><small>1 run frozen</small></div>
+            <div class="step done clickable" data-step="evidence"><strong>Evidence set</strong><small>Approved 5 Nov</small></div>
+            <div class="step done clickable" data-step="candidates"><strong>Candidates</strong><small>12 generated</small></div>
+            <div class="step current clickable" data-step="review"><strong>Review</strong><small>5 decisions pending</small></div>
+            <div class="step blocked clickable" data-step="finalize"><strong>Finalise</strong><small>Blocked: 5 pending</small></div>
+          </div>
+
+          <!-- Step 1 -->
+          <section class="wizard-step" id="step-dataset">
+            <section class="panel"><div class="panel-head"><div><p class="kicker">Step 1</p><h2>Choose the risk-ready dataset</h2></div></div>
+              <div class="filter-bar" style="margin-bottom:12px"><label>Period<select><option>Last 90 days</option></select></label><label>Scope<select><option>My lots</option><option data-roles="auditor platform_admin">All permitted</option></select></label><label class="grow">Find<input placeholder="Lot, external reference, reporting entity, period"></label><label>Only with completed risk runs<select><option>Yes</option><option>No</option></select></label></div>
+              <div class="table-wrap"><table class="data-table"><thead><tr><th></th><th>Lot</th><th>Dataset</th><th>Reporting period</th><th class="num">Reports</th><th class="num">Completed risk runs</th><th>Published</th></tr></thead><tbody>
+                <tr><td><input type="radio" name="ds" checked style="width:auto"></td><td>FY2024-Q2-batch-02</td><td>Risk ready v1 <span data-ids="9f8b2c11-4d3e-4f5a-8b6c-7d8e9f0a1b2c" data-kind="dataset"></span></td><td>FY2024</td><td class="num">18</td><td class="num">1 (+1 running)</td><td>29 Oct · a.sharma</td></tr>
+                <tr><td><input type="radio" name="ds" style="width:auto"></td><td>FY2024-Q1-batch-01</td><td>Risk ready v1 <span data-ids="8e7d6c5b-4a39-4281-9706-5f4e3d2c1b0a" data-kind="dataset"></span></td><td>FY2024</td><td class="num">22</td><td class="num">2</td><td>20 Oct · a.sharma</td></tr>
+              </tbody></table></div>
+              <div class="function-actions"><span>Datasets outside your scope are not listed.</span><button class="command" data-go-step="runs">CONTINUE →</button></div>
+            </section>
+          </section>
+
+          <!-- Step 2 -->
+          <section class="wizard-step" id="step-runs">
+            <section class="panel"><div class="panel-head"><div><p class="kicker">Step 2</p><h2>Review risk runs and freeze them as evidence</h2></div></div>
+              <p class="muted" style="margin-top:0">Only <b>completed</b> risk-assessment runs on this snapshot can be included. Running or failed runs are shown for context.</p>
+              <div class="run-list">
+                <article class="run-card"><div class="top"><input type="checkbox" checked disabled style="width:auto" aria-label="Included"><span class="status completed">Completed</span><span data-ids="77aa33bb-cc44-4dd5-9ee6-ff7700881199" data-kind="run"></span><span class="meta">analyze_profit_presence_mismatch, analyze_etr_outlier · 9 results · yesterday 17:30 · a.sharma</span><div class="right"><span class="status completed">In approved set</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Parameters</dt><dd>profit_presence: employee_floor 10, profit_margin_cap 0.35 · etr_outlier: etr_floor 0.05</dd><dt>Results by function</dt><dd>profit/presence 6 · ETR outlier 3</dd></dl><a class="text-button" href="04-runs.html#77aa33bb">OPEN IN RUN HISTORY →</a></div></article>
+                <article class="run-card"><div class="top"><input type="checkbox" disabled style="width:auto" aria-label="Not eligible"><span class="status running">Running</span><span data-ids="5e5e5e5e-1b2c-4d3e-9f80-aa11bb22cc33" data-kind="run"></span><span class="meta">cross_match_domestic_turnover, score_risk_components · started 15:12 · a.sharma</span><div class="right"><span class="muted">Eligible when completed</span></div></div></article>
+              </div>
+              <h3 style="margin:18px 0 8px">Create a new risk evidence set (draft) <span class="help" title="A named, immutable collection of the exact runs chosen above. It must be approved before candidates can be generated from it. It is not a dataset, not a final case set and not a report.">i</span></h3>
+              <div class="inline-fields"><label>Risk evidence set name<input value="Q2 risk evidence 2026-11-06 (supplementary)"></label><label>Runs to include<input value="0 selected (tick completed runs above)" disabled></label></div>
+              <div class="function-actions"><span>Existing approved set for this snapshot: <b>Q2 risk evidence 2026-11-05</b> (1 run).</span><button class="command disabled" disabled title="Select at least one completed run">CREATE RISK EVIDENCE SET (DRAFT)</button></div>
+            </section>
+          </section>
+
+          <!-- Step 3 -->
+          <section class="wizard-step" id="step-evidence">
+            <section class="panel"><div class="panel-head"><div><p class="kicker">Step 3</p><h2>Approve the evidence set</h2></div></div>
+              <article class="run-card">
+                <div class="top"><span class="status completed">Approved</span><strong>Q2 risk evidence 2026-11-05</strong><span data-ids="a5a5a5a5-6b6b-4c7c-8d8d-9e9e0f0f1a1a" data-kind="evidence set"></span><div class="right"><span class="muted">approved 5 Nov 09:10 · r.mehta</span></div></div>
+                <div class="body"><dl class="kv"><dt>Included runs</dt><dd><span data-ids="77aa33bb-cc44-4dd5-9ee6-ff7700881199" data-kind="run"></span> · 9 results</dd><dt>Approval rationale</dt><dd>Risk evidence reviewed; both screens completed on all 18 reports. Approved for candidate generation.</dd><dt>Created by</dt><dd>a.sharma · 5 Nov 08:52 (draft)</dd></dl><div class="row-actions"><button class="command" data-go-step="candidates">GENERATE CANDIDATES FROM THIS SET →</button><a class="secondary" href="07-oversight.html?evidence=a5a5a5a5">VIEW LINEAGE</a></div></div>
+              </article>
+              <div class="callout" style="margin-top:14px"><strong>How a draft looks</strong>A draft set shows <span class="status pending">Draft</span> and an <b>Approve</b> button for users with the case_manager role. Approval opens a dialog (example below) instead of a browser prompt.</div>
+              <button class="secondary" data-dialog="approveDialog">SHOW APPROVE DIALOG (EXAMPLE)</button>
+            </section>
+          </section>
+
+          <!-- Step 4 -->
+          <section class="wizard-step" id="step-candidates">
+            <section class="panel"><div class="panel-head"><div><p class="kicker">Step 4</p><h2>Generate candidates</h2></div></div>
+              <div class="callout ok"><strong>Generated</strong>Run <span data-ids="c0ffee00-1234-4abc-8def-001122334455" data-kind="run"></span> completed yesterday 18:05 and created batch <span data-ids="b7b7b7b7-8c8c-4d9d-9e0e-f1f1a2a2b3b3" data-kind="batch"></span> with 12 candidates (thresholds: min score 0.60, max 25).</div>
+              <h3 style="margin:16px 0 8px">Generate another batch from the approved set</h3>
+              <p class="muted" style="margin-top:0">The approved evidence set ID is passed to <code>generate_case_candidates</code> automatically.</p>
+              <div class="inline-fields"><label>Minimum score<input type="number" value="0.60" step="0.05" min="0" max="1"></label><label>Maximum candidates<input type="number" value="25"></label></div>
+              <div class="exec-summary"><h3>Before you queue</h3><dl class="kv" style="margin:0"><dt>Dataset</dt><dd>FY2024-Q2-batch-02 · Risk ready v1</dd><dt>Evidence set</dt><dd>Q2 risk evidence 2026-11-05 (approved)</dd><dt>Function</dt><dd>generate_case_candidates (stage 07, purpose case_review)</dd><dt>Result</dt><dd>A new selection batch; the existing open batch is not affected</dd></dl></div>
+              <div class="function-actions"><span></span><button class="command" data-toast="Candidate generation queued. The new batch appears under Review when the run completes.">QUEUE CANDIDATE GENERATION</button></div>
+            </section>
+          </section>
+
+          <!-- Step 5 (current) -->
+          <section class="wizard-step active" id="step-review">
+            <section class="panel">
+              <div class="panel-head"><div><p class="kicker">Step 5</p><h2>Review candidates and record decisions</h2></div><span class="status pending">Batch open</span></div>
+              <div class="batch-header">
+                <div><span>Selection batch</span><span data-ids="b7b7b7b7-8c8c-4d9d-9e0e-f1f1a2a2b3b3" data-kind="batch"></span></div>
+                <div><span>Evidence set · generation run</span><strong>Q2 risk evidence 2026-11-05 · run c0ffee00…</strong></div>
+                <div><span>Thresholds</span><strong>min score 0.60 · max 25</strong></div>
+                <div><span>Decisions</span><strong>5 selected · 1 not selected · 1 deferred · <b style="color:var(--red)">5 pending</b></strong></div>
+              </div>
+              <div class="filter-bar" style="margin-bottom:12px">
+                <label>Decision<div class="segmented"><button type="button" class="active">All 12</button><button type="button">Pending 5</button><button type="button">Selected 5</button><button type="button">Not selected 1</button><button type="button">Deferred 1</button></div></label>
+                <label>Score ≥<input type="number" value="0.60" step="0.05"></label>
+                <label>Function<select><option>Any</option><option>Profit/presence mismatch</option><option>ETR outlier</option></select></label>
+                <label>Reason code<select><option>Any</option><option>PROFIT_PRESENCE_MISMATCH</option><option>ETR_OUTLIER_LOW</option></select></label>
+                <label>Jurisdiction<select><option>Any</option><option>IE</option><option>NL</option><option>SG</option><option>AE</option></select></label>
+                <label class="grow">Entity / report<input placeholder="Name or ID"></label>
+              </div>
+
+              <div class="candidate pending-row">
+                <div class="head"><input type="checkbox" style="width:auto" aria-label="Select for bulk decision"><span class="status pending">Pending</span><strong>Northfield Finance DAC</strong><span class="muted">CBC-IN-2024-00017 · IE</span><div class="right"><span class="status warning">score 0.91</span></div></div>
+                <div class="evidence-summary">
+                  <div><span>Reason</span><b>PROFIT_PRESENCE_MISMATCH</b> — 380m profit before tax with 6 employees</div>
+                  <div><span>Source</span>analyze_profit_presence_mismatch · run 77aa33bb…</div>
+                  <div><span>Also flagged</span>ETR_OUTLIER_LOW (ETR 1.1 %)</div>
+                </div>
+                <details class="tech-details"><summary>Raw risk results</summary><pre>{"rule_code":"PROFIT_PRESENCE_MISMATCH","severity":"high","evidence":{"profit_before_tax":380000000,"employees":6,"tangible_assets":1200000,"margin":0.93}}</pre></details>
+                <div class="decision-row"><select aria-label="Decision"><option>Selected for audit handoff</option><option>Not selected</option><option>Deferred</option></select><textarea rows="2" placeholder="Decision rationale (required)"></textarea><button class="command" data-toast="Decision saved. 4 candidates remain pending.">SAVE DECISION</button></div>
+              </div>
+
+              <div class="candidate pending-row">
+                <div class="head"><input type="checkbox" style="width:auto" aria-label="Select for bulk decision"><span class="status pending">Pending</span><strong>Amberline Treasury BV</strong><span class="muted">CBC-IN-2024-00018 · NL</span><div class="right"><span class="status warning">score 0.74</span></div></div>
+                <div class="evidence-summary">
+                  <div><span>Reason</span><b>ETR_OUTLIER_LOW</b> — effective tax rate 2.4 % vs group 21 %</div>
+                  <div><span>Source</span>analyze_etr_outlier · run 77aa33bb…</div>
+                  <div><span>Context</span>related-party revenue share 0.62 (DQ warning)</div>
+                </div>
+                <details class="tech-details"><summary>Raw risk results</summary><pre>{"rule_code":"ETR_OUTLIER_LOW","severity":"medium","evidence":{"etr":0.024,"group_etr":0.21}}</pre></details>
+                <div class="decision-row"><select aria-label="Decision"><option>Selected for audit handoff</option><option>Not selected</option><option>Deferred</option></select><textarea rows="2" placeholder="Decision rationale (required)"></textarea><button class="command" data-toast="Decision saved.">SAVE DECISION</button></div>
+              </div>
+
+              <div class="candidate selected-row">
+                <div class="head"><input type="checkbox" style="width:auto" disabled><span class="status selected">Selected</span><strong>Kesari Trading FZE</strong><span class="muted">CBC-IN-2024-00021 · AE</span><div class="right"><span class="status warning">score 0.88</span><button class="chevron" data-toggle="next">›</button></div></div>
+                <div class="body" hidden><div class="evidence-summary"><div><span>Reason</span><b>PROFIT_PRESENCE_MISMATCH</b></div><div><span>Source</span>run 77aa33bb…</div><div><span>Decision</span>r.mehta · 5 Nov 18:40 — "High margin, no substance; refer for audit."</div></div><button class="text-button" style="margin-top:6px">CHANGE DECISION (REQUIRES RATIONALE)</button></div>
+              </div>
+
+              <div class="candidate deferred-row">
+                <div class="head"><input type="checkbox" style="width:auto" disabled><span class="status warning">Deferred</span><strong>Varuna Shipping Co Ltd</strong><span class="muted">CBC-IN-2024-00023 · IN</span><div class="right"><span class="status">score 0.63</span><button class="chevron" data-toggle="next">›</button></div></div>
+                <div class="body" hidden><div class="evidence-summary"><div><span>Reason</span><b>ETR_OUTLIER_LOW</b></div><div><span>Source</span>run 77aa33bb…</div><div><span>Decision</span>r.mehta · 5 Nov 18:42 — "Awaiting tonnage-tax clarification from domestic team."</div></div></div>
+              </div>
+
+              <div class="function-actions"><span>Showing 4 of 12 · <a class="text-button" href="#">show all</a></span><div style="display:flex;gap:8px;align-items:center"><span class="muted">2 ticked</span><button class="secondary" data-dialog="bulkDialog">APPLY DECISION TO TICKED…</button><button class="command disabled" disabled title="5 decisions still pending">FINALISE CASE SET</button></div></div>
+            </section>
+          </section>
+
+          <!-- Step 6 -->
+          <section class="wizard-step" id="step-finalize">
+            <section class="panel"><div class="panel-head"><div><p class="kicker">Step 6</p><h2>Finalise case set and hand off</h2></div></div>
+              <div class="readiness">
+                <div>
+                  <h3 style="margin:0 0 6px">Readiness</h3>
+                  <ul class="checklist">
+                    <li class="bad">All candidates decided — <b>5 pending</b> <button class="text-button" data-go-step="review">REVIEW →</button></li>
+                    <li class="ok">At least one candidate selected (5)</li>
+                    <li class="ok">Batch is open</li>
+                    <li class="ok">You have the case_manager role</li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 style="margin:0 0 6px">What finalisation creates</h3>
+                  <p style="margin:0;font-size:13px">An immutable <b>Final case set</b> containing the 5 selected candidates, and one <b>Audit handoff case</b> per selected candidate. Not-selected and deferred candidates are kept in the batch record for audit.</p>
+                  <div class="function-actions" style="border:0;padding:0"><span></span><button class="command disabled" disabled>FINALISE CASE SET…</button></div>
+                  <button class="secondary" data-dialog="finalizeDialog">SHOW FINALISE DIALOG (EXAMPLE)</button>
+                </div>
+              </div>
+            </section>
+            <section class="panel"><div class="panel-head"><div><p class="kicker">After finalisation (example from FY2024-Q1-batch-01)</p><h2>Handoff and reports</h2></div><a class="command" href="06-reports.html">OPEN REPORTS →</a></div>
+              <div class="run-card" style="margin-bottom:10px"><div class="top"><span class="status completed">Finalised</span><strong>Audit handoff 2026-10-28</strong><span data-ids="4d4d4d4d-5e5e-4f6f-8a7a-8b8b9c9c0d0d" data-kind="case set"></span><span class="meta">6 cases · finalised 28 Oct 16:20 by r.mehta</span></div></div>
+              <div class="table-wrap"><table><thead><tr><th>Audit handoff case</th><th>Report · entity</th><th>Risk basis</th><th>Status</th><th></th></tr></thead><tbody>
+                <tr><td><span data-ids="ac01ac01-1111-4222-8333-444455556666" data-kind="audit case"></span></td><td>CBC-IN-2024-00005 · Solara Energy Ltd (IE)</td><td>PROFIT_PRESENCE_MISMATCH · 0.90</td><td><span class="status active">Handed off</span></td><td><a class="text-button" href="06-reports.html">REPORT →</a> <a class="text-button" href="07-oversight.html?case=ac01ac01">LINEAGE →</a></td></tr>
+                <tr><td><span data-ids="ac02ac02-1111-4222-8333-444455556666" data-kind="audit case"></span></td><td>CBC-IN-2024-00011 · Meridian Logistics BV (NL)</td><td>ETR_OUTLIER_LOW · 0.71</td><td><span class="status active">Handed off</span></td><td><a class="text-button" href="06-reports.html">REPORT →</a> <a class="text-button" href="07-oversight.html?case=ac02ac02">LINEAGE →</a></td></tr>
+                <tr><td colspan="5" class="muted">… 4 more</td></tr>
+              </tbody></table></div>
+            </section>
+          </section>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="approveDialog">
+    <form method="dialog">
+      <div class="dialog-head"><div><p class="kicker">Approve risk evidence set</p><h2>Q2 risk evidence (draft)</h2></div><button value="cancel" class="icon-button" aria-label="Close">×</button></div>
+      <table class="summary-table"><tr><th>Dataset</th><td>FY2024-Q2-batch-02 · Risk ready v1</td></tr><tr><th>Included runs</th><td>1 completed run · 9 risk results</td></tr><tr><th>Effect</th><td>The set becomes immutable and may be used to generate candidate batches</td></tr></table>
+      <label>Approval rationale (required)<textarea rows="3">Risk evidence reviewed and approved for candidate generation</textarea></label>
+      <div class="dialog-actions"><button value="cancel" class="secondary">CANCEL</button><button class="command" data-toast="Evidence set approved. You can now generate candidates from it.">APPROVE</button></div>
+    </form>
+  </dialog>
+  <dialog id="bulkDialog">
+    <form method="dialog">
+      <div class="dialog-head"><div><p class="kicker">Bulk decision</p><h2>Apply to 2 candidates</h2></div><button value="cancel" class="icon-button" aria-label="Close">×</button></div>
+      <label>Decision<select><option>Not selected</option><option>Deferred</option><option>Selected for audit handoff</option></select></label>
+      <label>Rationale (recorded on each candidate)<textarea rows="3" placeholder="Required"></textarea></label>
+      <div class="callout warn" style="margin:0"><strong>Recorded individually</strong>Each candidate gets its own decision event with your user and timestamp.</div>
+      <div class="dialog-actions"><button value="cancel" class="secondary">CANCEL</button><button class="command" data-toast="2 decisions saved.">APPLY</button></div>
+    </form>
+  </dialog>
+  <dialog id="finalizeDialog">
+    <form method="dialog">
+      <div class="dialog-head"><div><p class="kicker">Finalise case set</p><h2>Create immutable final case set</h2></div><button value="cancel" class="icon-button" aria-label="Close">×</button></div>
+      <table class="summary-table"><tr><th>Batch</th><td>b7b7b7b7… · 12 candidates</td></tr><tr><th>Selected</th><td>5 → 5 audit handoff cases</td></tr><tr><th>Not selected / deferred</th><td>1 / 1 (kept in batch record)</td></tr><tr><th>Evidence set</th><td>Q2 risk evidence 2026-11-05</td></tr></table>
+      <label>Final case set name<input value="Audit handoff 2026-11-06"></label>
+      <label>Finalisation rationale (required)<textarea rows="3">Human review completed; selected cases approved for audit handoff</textarea></label>
+      <div class="dialog-actions"><button value="cancel" class="secondary">CANCEL</button><button class="command" data-toast="Final case set created. Opening reports…">FINALISE</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="mock.js"></script>
+</body>
+</html>

@@ -93,6 +93,10 @@ body.wip dialog { border-radius: 0; border: 2px solid var(--ink); background: va
 body.wip dialog::backdrop { background: rgba(46, 49, 44, .42); }
 body.wip #toast { border-radius: 0; font-family: inherit; }
 
+/* Repair the legacy dialog width declaration in niche.css without altering the
+   retained advanced interface's visual language. */
+body.wip dialog { width: min(550px, calc(100% - 28px)); }
+
 html:not(.unused) body:not(.wip) .wip-only { display: none; }
 body.wip .wip-only { display: inline; }
 @media (max-width: 760px) {

@@ -292,8 +292,11 @@ class DataPlaneService:
 
     def dataset(self, dataset_id: str, version: int = 1) -> dict[str, Any] | None:
         row = self.db.one(
-            """SELECT * FROM cbcr_control.dataset
-               WHERE dataset_id=%s AND version=%s""",
+            """SELECT d.*,l.external_lot_ref,l.received_by,l.received_at,
+                      l.source_id,l.status AS lot_status
+               FROM cbcr_control.dataset d
+               JOIN cbcr_control.lot l ON l.lot_id=d.lot_id
+               WHERE d.dataset_id=%s AND d.version=%s""",
             (dataset_id, version),
         )
         if not row:
@@ -320,22 +323,55 @@ class DataPlaneService:
         return row
 
     def list_datasets(
-        self, lot_id: str | None = None, zone: str | None = None
+        self,
+        lot_id: str | None = None,
+        zone: str | None = None,
+        *,
+        owner: str | None = None,
+        status: str | None = None,
+        query: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+        page: int = 1,
+        page_size: int = 100,
     ) -> list[dict[str, Any]]:
         clauses, values = [], []
         if lot_id:
-            clauses.append("lot_id=%s")
+            clauses.append("d.lot_id=%s")
             values.append(lot_id)
         if zone:
-            clauses.append("zone=%s")
+            clauses.append("d.zone=%s")
             values.append(zone)
+        if owner:
+            clauses.append("l.received_by=%s")
+            values.append(owner)
+        if status:
+            clauses.append("d.status=%s")
+            values.append(status)
+        if date_from:
+            clauses.append("d.created_at >= %s::timestamptz")
+            values.append(date_from)
+        if date_to:
+            clauses.append("d.created_at < (%s::date + interval '1 day')")
+            values.append(date_to)
+        if query:
+            clauses.append(
+                "(d.dataset_id::text ILIKE %s OR d.lot_id::text ILIKE %s "
+                "OR COALESCE(l.external_lot_ref,'') ILIKE %s)"
+            )
+            needle = f"%{query}%"
+            values.extend((needle, needle, needle))
         where = " WHERE " + " AND ".join(clauses) if clauses else ""
+        values.extend((page_size, (page - 1) * page_size))
         rows = self.db.all(
-            """SELECT dataset_id,version,lot_id,zone,status,parent_dataset_id,parent_version,
-                      pipeline_profile_id,report_count,created_at
-               FROM cbcr_control.dataset"""
+            """SELECT d.dataset_id,d.version,d.lot_id,d.zone,d.status,
+                      d.parent_dataset_id,d.parent_version,d.pipeline_profile_id,
+                      d.report_count,d.created_by,d.created_at,d.published_at,
+                      l.external_lot_ref,l.received_by,l.received_at
+               FROM cbcr_control.dataset d
+               JOIN cbcr_control.lot l ON l.lot_id=d.lot_id"""
             + where
-            + " ORDER BY created_at",
+            + " ORDER BY d.created_at DESC LIMIT %s OFFSET %s",
             tuple(values),
         )
         for row in rows:

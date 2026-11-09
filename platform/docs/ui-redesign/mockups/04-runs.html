@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Run history · CbCR Workbench (mockup)</title>
+  <link rel="stylesheet" href="base-niche.css">
+  <link rel="stylesheet" href="base-wip.css">
+  <link rel="stylesheet" href="base-reports.css">
+  <link rel="stylesheet" href="redesign.css">
+</head>
+<body class="wip" data-page="runs" data-default-persona="analyst">
+  <header class="masthead" id="masthead"></header>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="Application navigation"></aside>
+    <main>
+      <div class="mock-note"><b>Mockup 04 · Run history</b> (brief §7.6). Inspect expands <i>below the row</i> instead of at the bottom of the page. Scope defaults to "My runs". Columns are sortable, filters are server-side and URL-persisted, and every row offers the actions that make sense for that run.</div>
+
+      <div class="title-row">
+        <div><p class="kicker">Archive, not deletion</p><h1>Run history</h1><p class="lede">Every asynchronous run, with its functions, findings and the snapshot it ran on.</p></div>
+        <button class="secondary">REFRESH</button>
+      </div>
+
+      <section class="panel filter-bar" aria-label="Filters">
+        <label>Scope<div class="segmented"><button type="button" class="active">My runs</button><button type="button" data-roles="auditor platform_admin">All permitted</button><button type="button" data-roles="auditor platform_admin">User…</button></div></label>
+        <label>Period<select><option>Last 7 days</option><option>Today</option><option>Last 30 days</option><option>Custom…</option></select></label>
+        <label>Group<div class="segmented"><button type="button" class="active">All</button><button type="button">Active</button><button type="button">Completed</button><button type="button">Failed</button><button type="button">Archived</button></div></label>
+        <label>Purpose<select><option>Any</option><option>Data quality</option><option>Risk assessment</option><option>Case review</option></select></label>
+        <label>Function<select><option>Any</option><option>check_completeness</option><option>resolve_entity</option><option>analyze_etr_outlier</option><option>generate_case_candidates</option></select></label>
+        <label>Input stage<select><option>Any</option><option>Canonical</option><option>DQ passed</option><option>Enriched</option><option>Risk ready</option></select></label>
+        <div class="actions"><button class="secondary" data-toggle="#moreRunFilters" aria-expanded="false">MORE FILTERS</button><button class="command">APPLY</button></div>
+        <div class="filter-more" id="moreRunFilters" hidden>
+          <label class="grow">Lot / external reference<input placeholder="FY2024-Q3-batch-03"></label>
+          <label class="grow">Dataset ID / version<input placeholder="Paste full dataset ID"></label>
+          <label>Report / entity ID<input placeholder="CBC-IN-2024-00017"></label>
+          <label>Findings<select><option>Any</option><option>Present</option><option>None (clean)</option></select></label>
+          <label>Max severity<select><option>Any</option><option>Error</option><option>Warning</option><option>Info</option></select></label>
+          <label>Initiated by<select><option>Me</option><option>Anyone permitted</option></select></label>
+        </div>
+        <div class="chips"><span class="chip"><b>Scope:</b> My runs <button type="button">×</button></span><span class="chip"><b>Period:</b> Last 7 days <button type="button">×</button></span><span class="chip url">URL: /runs?scope=me&amp;period=7d&amp;sort=-submitted</span></div>
+      </section>
+
+      <div class="table-wrap"><table class="data-table">
+        <thead><tr>
+          <th class="w-actions"></th><th class="w-status">Status</th><th class="w-id">Run</th><th>Purpose · functions</th><th>Lot · input snapshot</th><th class="sort desc nowrap">Submitted</th><th class="sort nowrap">Duration</th><th class="sort num">Findings</th>
+        </tr></thead>
+        <tbody>
+          <!-- Failed run, expanded by default (the one the Home card linked to) -->
+          <tr class="summary open" id="f00dbeef"><td><button class="chevron" aria-label="Collapse">›</button></td><td><span class="status failed">Failed</span></td><td><span data-ids="f00dbeef-9c1a-4a3e-8f52-6d2b1c7e9a44" data-kind="run"></span></td><td>Data quality<br><small class="muted">validate_receipt_identity, check_completeness</small></td><td>demo-20260821-01<br><small class="muted">Canonical v1 · 4 reports</small></td><td class="nowrap">Today 15:41</td><td class="nowrap">12 s</td><td class="num">—</td></tr>
+          <tr class="row-detail"><td colspan="8">
+            <div class="detail-head"><h3>Run f00dbeef… · failed at 15:41</h3><div class="row-actions"><button class="command" data-toast="Run re-queued with the same functions and parameters.">RETRY RUN</button><a class="secondary" href="03-workspace.html">OPEN DATASET</a><a class="secondary" href="07-oversight.html?run=f00dbeef">VIEW LINEAGE</a><button class="chevron" data-toggle="next" aria-label="Collapse">×</button></div></div>
+            <div class="callout danger"><strong>check_completeness failed: source timeout</strong>The function could not read the Canonical records within 10 s. The other function in this run completed. Retrying usually succeeds; if it fails again, contact support with this run ID.</div>
+            <div class="child-grid">
+              <article class="child-card"><span class="zone">Stage 01</span><strong>Validate receipt identity</strong> <span class="status completed">Completed</span><dl class="kv"><dt>Reports</dt><dd>4 checked</dd><dt>Findings</dt><dd>0</dd><dt>Duration</dt><dd>3 s</dd></dl></article>
+              <article class="child-card"><span class="zone">Stage 04</span><strong>Check completeness</strong> <span class="status failed">Failed</span><dl class="kv"><dt>Error</dt><dd>SourceTimeout after 10 000 ms</dd><dt>Parameters</dt><dd>required_fields: 5 fields (defaults)</dd></dl></article>
+            </div>
+            <dl class="kv"><dt>Submitted by</dt><dd>a.sharma · today 15:41</dd><dt>Started / completed</dt><dd>15:41:03 / 15:41:15</dd><dt>Input</dt><dd>demo-20260821-01 · Canonical v1 · <span data-ids="5f607182-93a4-4b5c-d6e7-f8091a2b3c4d" data-kind="dataset"></span></dd></dl>
+            <details class="tech-details"><summary>Technical details (raw run JSON)</summary><pre>{"run_id":"f00dbeef-9c1a-4a3e-8f52-6d2b1c7e9a44","status":"failed","purpose":"data_quality","input_zone":"canonical","function_runs":[{"function_code":"validate_receipt_identity","status":"completed"},{"function_code":"check_completeness","status":"failed","error":{"type":"SourceTimeout","timeout_ms":10000}}]}</pre></details>
+          </td></tr>
+
+          <tr class="summary" id="5e5e5e5e"><td><button class="chevron" aria-label="Expand">›</button></td><td><span class="status running">Running</span></td><td><span data-ids="5e5e5e5e-1b2c-4d3e-9f80-aa11bb22cc33" data-kind="run"></span></td><td>Risk assessment<br><small class="muted">cross_match_domestic_turnover, score_risk_components</small></td><td>FY2024-Q2-batch-02<br><small class="muted">Risk ready v1 · 18 reports</small></td><td class="nowrap">Today 15:12</td><td class="nowrap">running 56 min</td><td class="num">—</td></tr>
+          <tr class="row-detail" hidden><td colspan="8"><div class="detail-head"><h3>Run 5e5e5e5e… · running</h3><div class="row-actions"><a class="secondary" href="03-workspace.html">OPEN DATASET</a><button class="secondary" data-toast="Cancellation requested.">CANCEL</button></div></div><div class="child-grid"><article class="child-card"><span class="zone">Stage 06</span><strong>Cross-match domestic turnover</strong> <span class="status completed">Completed</span></article><article class="child-card"><span class="zone">Stage 06</span><strong>Score risk components</strong> <span class="status running">Running</span><small class="muted">14 of 18 reports scored</small></article></div></td></tr>
+
+          <tr class="summary"><td><button class="chevron" aria-label="Expand">›</button></td><td><span class="status queued">Queued</span></td><td><span data-ids="6a7b8c9d-0e1f-4a2b-9c3d-4e5f6a7b8c9d" data-kind="run"></span></td><td>Data quality<br><small class="muted">resolve_entity</small></td><td>FY2024-Q3-batch-03<br><small class="muted">DQ passed v1 · 10 reports</small></td><td class="nowrap">Today 15:58</td><td class="nowrap">—</td><td class="num">—</td></tr>
+          <tr class="row-detail" hidden><td colspan="8"><p>Position 1 in queue.</p></td></tr>
+
+          <tr class="summary" id="ab12cd34"><td><button class="chevron" aria-label="Expand">›</button></td><td><span class="status completed">Completed</span></td><td><span data-ids="ab12cd34-5e6f-4a7b-8c9d-0e1f2a3b4c5d" data-kind="run"></span></td><td>Data quality<br><small class="muted">4 functions · used as DQ gate run</small></td><td>FY2024-Q3-batch-03<br><small class="muted">Canonical v1 · 12 reports</small></td><td class="nowrap">Today 09:48</td><td class="nowrap">1 min 40 s</td><td class="num"><span class="status warning">2 warn</span></td></tr>
+          <tr class="row-detail" hidden><td colspan="8">
+            <div class="detail-head"><h3>Run ab12cd34… · completed 09:50</h3><div class="row-actions"><a class="secondary" href="03-workspace.html">OPEN DATASET</a><a class="command" href="03-workspace.html#publish">EVALUATE DQ GATE</a><a class="secondary" href="07-oversight.html?run=ab12cd34">VIEW LINEAGE</a></div></div>
+            <div class="child-grid">
+              <article class="child-card"><span class="zone">Stage 01</span><strong>Validate receipt identity</strong> <span class="status completed">Completed</span><small class="muted">12 reports · 0 findings</small></article>
+              <article class="child-card"><span class="zone">Stage 01</span><strong>Detect duplicate report</strong> <span class="status completed">Completed</span><small class="muted">1 finding (error)</small></article>
+              <article class="child-card"><span class="zone">Stage 04</span><strong>Check completeness</strong> <span class="status completed">Completed</span><small class="muted">1 finding (error)</small></article>
+              <article class="child-card"><span class="zone">Stage 04</span><strong>Check related revenue share</strong> <span class="status completed">Completed</span><small class="muted">2 findings (warning)</small></article>
+            </div>
+            <h4 style="margin:14px 0 6px">Findings (4)</h4>
+            <article class="finding error"><h4>DUPLICATE_BUSINESS_KEY</h4><small>detect_duplicate_report · CBC-IN-2024-00009</small><p>Report shares a business key with CBC-IN-2024-00003 (period 2024-03-31).</p></article>
+            <article class="finding error"><h4>COMPLETENESS_MISSING_TAX_PAID</h4><small>check_completeness · CBC-IN-2024-00004 · IE</small><p>tax_paid is missing for 2 of 7 constituent entities.</p></article>
+            <article class="finding"><h4>RPT_SHARE_ABOVE_THRESHOLD</h4><small>check_rpt_share_threshold · CBC-IN-2024-00017 · IE</small><p>Related-party revenue share 1.00 exceeds threshold 0.50 for Northfield Finance DAC.</p><details class="tech-details"><summary>Evidence</summary><pre>{"entity_id":"IE-NFF-002","revenue_related":410000000,"revenue_unrelated":0,"share":1.0,"threshold":0.5}</pre></details></article>
+            <article class="finding"><h4>RPT_SHARE_ABOVE_THRESHOLD</h4><small>check_rpt_share_threshold · CBC-IN-2024-00018 · NL</small><p>Related-party revenue share 0.62 exceeds threshold 0.50 for Amberline Treasury BV.</p></article>
+          </td></tr>
+
+          <tr class="summary" id="77aa33bb"><td><button class="chevron" aria-label="Expand">›</button></td><td><span class="status completed">Completed</span></td><td><span data-ids="77aa33bb-cc44-4dd5-9ee6-ff7700881199" data-kind="run"></span></td><td>Risk assessment<br><small class="muted">analyze_profit_presence_mismatch, analyze_etr_outlier</small></td><td>FY2024-Q2-batch-02<br><small class="muted">Risk ready v1 · 18 reports</small></td><td class="nowrap">Yesterday 17:30</td><td class="nowrap">4 min 02 s</td><td class="num"><span class="status completed">9 results</span></td></tr>
+          <tr class="row-detail" hidden><td colspan="8"><div class="detail-head"><h3>Run 77aa33bb… · in approved evidence set "Q2 risk evidence 2026-11-05"</h3><div class="row-actions"><a class="secondary" href="03-workspace.html">OPEN DATASET</a><a class="secondary" href="05-cases.html#evidence">OPEN EVIDENCE SET</a><a class="secondary" href="07-oversight.html?run=77aa33bb">VIEW LINEAGE</a></div></div><p class="muted">9 risk results across 7 reports; see the evidence set for the frozen view.</p></td></tr>
+
+          <tr class="summary"><td><button class="chevron" aria-label="Expand">›</button></td><td><span class="status completed">Completed</span></td><td><span data-ids="c0ffee00-1234-4abc-8def-001122334455" data-kind="run"></span></td><td>Case review<br><small class="muted">generate_case_candidates</small></td><td>FY2024-Q2-batch-02<br><small class="muted">Risk ready v1 · evidence set Q2 risk evidence</small></td><td class="nowrap">Yesterday 18:05</td><td class="nowrap">41 s</td><td class="num"><span class="status completed">12 candidates</span></td></tr>
+          <tr class="row-detail" hidden><td colspan="8"><div class="detail-head"><h3>Run c0ffee00… · created selection batch</h3><div class="row-actions"><a class="command" href="05-cases.html#review">REVIEW CANDIDATES</a><a class="secondary" href="07-oversight.html?run=c0ffee00">VIEW LINEAGE</a></div></div><dl class="kv"><dt>Thresholds</dt><dd>min_score 0.60 · max_candidates 25</dd><dt>Batch</dt><dd><span data-ids="b7b7b7b7-8c8c-4d9d-9e0e-f1f1a2a2b3b3" data-kind="batch"></span> · 12 candidates · 5 pending</dd></dl></td></tr>
+        </tbody></table></div>
+      <div class="pager"><span>6 runs match · newest first</span><div class="pages"><button class="active">1</button></div></div>
+    </main>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="mock.js"></script>
+</body>
+</html>

@@ -20,6 +20,7 @@
   runtime/
   *.log
   logs/
+tmp/
 
   # Secrets and local connection settings
   .env
@@ -68,3 +69,7 @@
   dist/
   build/
   .wrangler/
+
+# Local acceptance-test base directories
+.pytest-ui-*/
+__origin_main_snapshot.tar

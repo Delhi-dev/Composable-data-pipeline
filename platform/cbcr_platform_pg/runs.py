@@ -283,18 +283,87 @@ class RunService:
         row["function_runs"] = children
         return row
 
-    def list(self) -> list[dict[str, Any]]:
+    def list(
+        self,
+        *,
+        owner: str | None = None,
+        status: str | None = None,
+        purpose: str | None = None,
+        function_code: str | None = None,
+        input_zone: str | None = None,
+        dataset_id: str | None = None,
+        lot_id: str | None = None,
+        query: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+        page: int = 1,
+        page_size: int = 100,
+    ) -> list[dict[str, Any]]:
+        clauses: list[str] = []
+        values: list[Any] = []
+        if owner:
+            clauses.append("r.requested_by=%s")
+            values.append(owner)
+        if status:
+            statuses = [value.strip() for value in status.split(",") if value.strip()]
+            clauses.append("r.status IN (" + ",".join(["%s"] * len(statuses)) + ")")
+            values.extend(statuses)
+        if purpose:
+            clauses.append("r.purpose=%s")
+            values.append(purpose)
+        if function_code:
+            clauses.append(
+                "EXISTS(SELECT 1 FROM cbcr_control.function_run fr "
+                "WHERE fr.run_id=r.run_id AND fr.function_code=%s)"
+            )
+            values.append(function_code)
+        if input_zone:
+            clauses.append("r.input_zone=%s")
+            values.append(input_zone)
+        if dataset_id:
+            clauses.append("r.dataset_id=%s")
+            values.append(dataset_id)
+        if lot_id:
+            clauses.append("d.lot_id=%s")
+            values.append(lot_id)
+        if date_from:
+            clauses.append("r.created_at >= %s::timestamptz")
+            values.append(date_from)
+        if date_to:
+            clauses.append("r.created_at < (%s::date + interval '1 day')")
+            values.append(date_to)
+        if query:
+            clauses.append(
+                "(r.run_id::text ILIKE %s OR r.dataset_id::text ILIKE %s "
+                "OR d.lot_id::text ILIKE %s OR COALESCE(l.external_lot_ref,'') ILIKE %s)"
+            )
+            needle = f"%{query}%"
+            values.extend((needle, needle, needle, needle))
+        where = " WHERE " + " AND ".join(clauses) if clauses else ""
+        values.extend((page_size, (page - 1) * page_size))
         rows = self.db.all(
             """SELECT r.run_id,r.dataset_id,r.dataset_version,r.input_zone,l.source_id,
+                      d.lot_id,l.external_lot_ref,
                       r.requested_by,r.purpose,r.status,r.selected_functions,
-                      r.created_at,r.completed_at
+                      r.created_at,r.started_at,r.completed_at,
+                      (SELECT COUNT(*) FROM cbcr_dq.finding f
+                       WHERE f.run_id=r.run_id) AS finding_count,
+                      (SELECT MAX(CASE f.severity WHEN 'error' THEN 3
+                                                  WHEN 'warning' THEN 2 ELSE 1 END)
+                       FROM cbcr_dq.finding f WHERE f.run_id=r.run_id) AS severity_rank
                FROM cbcr_control.run r
                JOIN cbcr_control.dataset d
                  ON d.dataset_id=r.dataset_id AND d.version=r.dataset_version
                JOIN cbcr_control.lot l ON l.lot_id=d.lot_id
-               ORDER BY r.created_at DESC"""
+            """ + where + " ORDER BY r.created_at DESC LIMIT %s OFFSET %s",
+            tuple(values),
         )
-        return [_string_ids(row, ("run_id",)) for row in rows]
+        for row in rows:
+            _string_ids(row, ("run_id", "dataset_id", "lot_id"))
+            row["maximum_severity"] = {3: "error", 2: "warning", 1: "info"}.get(
+                row.pop("severity_rank", None)
+            )
+        return rows
 
     def findings(self, run_id: str) -> list[dict[str, Any]]:
         rows = self.db.all(

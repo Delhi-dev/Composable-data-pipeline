@@ -16,6 +16,7 @@ $env:CBCR_PG_PORT = [string]$DatabasePort
 $env:CBCR_PG_DATABASE = $DatabaseName
 $env:CBCR_PG_USER = $DatabaseUser
 $env:CBCR_PG_PASSWORD_ENV = "CBCR_SOURCE_DB_PASSWORD"
+$env:CBCR_UI_IMPERSONATION = "1"
 
 if (-not $passwordWasAlreadySet) {
     $securePassword = Read-Host "Password for PostgreSQL role $DatabaseUser" -AsSecureString

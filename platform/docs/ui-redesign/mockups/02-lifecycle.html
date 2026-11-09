@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Data lifecycle · CbCR Workbench (mockup)</title>
+  <link rel="stylesheet" href="base-niche.css">
+  <link rel="stylesheet" href="base-wip.css">
+  <link rel="stylesheet" href="base-reports.css">
+  <link rel="stylesheet" href="redesign.css">
+</head>
+<body class="wip" data-page="lifecycle" data-default-persona="analyst">
+  <header class="masthead" id="masthead"></header>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="Application navigation"></aside>
+    <main>
+      <div class="mock-note"><b>Mockup 02 · Data lifecycle</b> (brief §7.4, §7.3). Each lot is a collapsible stage timeline instead of a rail of identical cards. The current stage is outlined; missing stages say why. "+ INTAKE LOT" opens the redesigned intake dialog. Filters are server-backed and mirrored in the URL.</div>
+
+      <div class="title-row">
+        <div><p class="kicker">Governed snapshots</p><h1>Data lifecycle</h1><p class="lede">Follow each intake lot from Landing to Risk ready. Open the current stage to run functions or publish the next snapshot.</p></div>
+        <button class="command" data-dialog="intakeDialog">+ INTAKE LOT</button>
+      </div>
+
+      <section class="panel filter-bar" aria-label="Filters">
+        <label>Scope
+          <div class="segmented" role="group" aria-label="Owner scope">
+            <button type="button" class="active">My lots</button>
+            <button type="button" data-roles="auditor platform_admin">All permitted</button>
+            <button type="button" data-roles="auditor platform_admin">User…</button>
+          </div>
+        </label>
+        <label>Period<select><option>Last 30 days</option><option>Today</option><option>Last 7 days</option><option>Custom…</option></select></label>
+        <label class="grow">Find<input placeholder="External reference, lot / dataset / report ID, reporting entity"></label>
+        <label>Current stage <span class="help" title="The processing stage represented by a dataset snapshot: Landing = source-shaped records · Canonical = mapped CbCR fields · DQ passed = records allowed through the DQ gate · Enriched = DQ-passed plus optional governed facts · Risk ready = final analytical snapshot">i</span><select><option>Any stage</option><option>Landing</option><option>Canonical</option><option>DQ passed</option><option>Enriched</option><option>Risk ready</option></select></label>
+        <label>Lot status<select><option>Any</option><option>Active</option><option>Complete</option><option>Archived</option></select></label>
+        <div class="actions"><button class="secondary" data-toggle="#moreFilters" aria-expanded="false">MORE FILTERS</button><button class="command">APPLY</button></div>
+        <div class="filter-more" id="moreFilters" hidden>
+          <label>Source<select><option>Any</option><option>Local CbCR PostgreSQL</option><option>Fixture alpha</option></select></label>
+          <label>Reporting period<select><option>Any</option><option>FY2024</option><option>FY2023</option></select></label>
+          <label>Dataset status<select><option>Any</option><option>Published</option><option>Superseded</option></select></label>
+          <label>Report count<input placeholder="e.g. ≥ 10"></label>
+          <label>Report ID<input placeholder="CBC-IN-2024-00017"></label>
+          <label>Dataset ID<input placeholder="Paste full dataset ID"></label>
+        </div>
+        <div class="chips">
+          <span class="chip"><b>Scope:</b> My lots <button type="button" aria-label="Remove">×</button></span>
+          <span class="chip"><b>Period:</b> Last 30 days <button type="button" aria-label="Remove">×</button></span>
+          <span class="chip url">URL: /lifecycle?scope=me&amp;period=30d</span>
+        </div>
+      </section>
+
+      <div class="pager"><span>3 lots · sorted by latest activity</span><span>Page 1 of 1</span></div>
+
+      <div class="lot-list">
+
+        <!-- Lot A: DQ passed is current -->
+        <section class="lot-group">
+          <div class="lot-head">
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <button class="lot-toggle" aria-label="Collapse lot">▾</button>
+              <div>
+                <p class="kicker">Intake lot · <span class="status active">Active</span></p>
+                <h2>FY2024-Q3-batch-03</h2>
+                <div class="lot-meta"><span data-ids="7c2e9f41-5b8a-4d2e-9a7f-3c1d8e6b2a90" data-kind="lot"></span><span>Received by <b>a.sharma</b></span><span>4 Nov 2026 09:12</span><span><b>12</b> reports</span><span>Source: Local CbCR PostgreSQL</span><span>Current stage: <b>DQ passed</b></span></div>
+              </div>
+            </div>
+            <div class="lot-actions"><a class="command" href="03-workspace.html#publish">ENRICH &amp; PUBLISH →</a></div>
+          </div>
+          <div class="lot-body">
+            <div class="lot-stage-list">
+              <article class="lot-stage zone-landing"><span class="zone">Landing</span><span data-ids="b41c7a02-3e5f-4d6a-9b8c-1f2e3d4c5b6a" data-kind="dataset"></span><small>v1 · 12 reports · source-shaped records</small><small>09:12 · a.sharma</small><div class="stage-actions"><a class="text-button" href="03-workspace.html">OPEN →</a></div></article>
+              <article class="lot-stage zone-canonical"><span class="zone">Canonical</span><span data-ids="294835a6-0c7d-4e8f-a1b2-c3d4e5f60718" data-kind="dataset"></span><small>v1 · 12 reports · 1 DQ run completed (2 warnings)</small><small>09:13 · a.sharma · gate: 10 eligible / 2 rejected</small><div class="stage-actions"><a class="text-button" href="03-workspace.html">OPEN →</a></div></article>
+              <article class="lot-stage zone-dq_passed latest"><span class="zone">DQ passed</span><span data-ids="d0f3a9b2-7e6c-4c1d-b8a5-2f4e9d1c0b77" data-kind="dataset"></span><small>v1 · 10 reports · 2 rejected at gate</small><small>11:02 · a.sharma · 1 run queued</small><div class="stage-actions"><a class="command" href="03-workspace.html">OPEN WORKSPACE</a></div></article>
+              <article class="lot-stage zone-enriched missing"><span class="zone">Enriched</span><small><b>Not yet published.</b></small><small>Enrichment is optional. Publish unchanged to continue, or add governed facts first.</small><div class="stage-actions"><a class="text-button" href="03-workspace.html#publish">ENRICH &amp; PUBLISH →</a></div></article>
+              <article class="lot-stage zone-risk_ready missing"><span class="zone">Risk ready</span><small><b>Requires an Enriched snapshot</b> (profile: Ideal separated data zones).</small></article>
+            </div>
+          </div>
+        </section>
+
+        <!-- Lot B: risk ready reached, profile without enriched stage -->
+        <section class="lot-group">
+          <div class="lot-head">
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <button class="lot-toggle" aria-label="Collapse lot">▾</button>
+              <div>
+                <p class="kicker">Intake lot · <span class="status active">Active</span></p>
+                <h2>FY2024-Q2-batch-02</h2>
+                <div class="lot-meta"><span data-ids="e1a7c3d5-8b9f-4a2e-b6c7-d8e9f0a1b2c3" data-kind="lot"></span><span>Received by <b>a.sharma</b></span><span>28 Oct 2026 14:40</span><span><b>18</b> reports</span><span>Profile: DQ-passed and enrichment combined</span><span>Current stage: <b>Risk ready</b></span></div>
+              </div>
+            </div>
+            <div class="lot-actions"><a class="secondary" href="03-workspace.html#functions">RUN RISK FUNCTIONS</a><a class="command" href="05-cases.html" data-roles="case_manager risk_analyst platform_admin auditor">CASE WORKBENCH →</a></div>
+          </div>
+          <div class="lot-body">
+            <div class="lot-stage-list">
+              <article class="lot-stage zone-landing"><span class="zone">Landing</span><span data-ids="0a1b2c3d-4e5f-4607-8192-a3b4c5d6e7f8" data-kind="dataset"></span><small>v1 · 18 reports</small><small>28 Oct · a.sharma</small><div class="stage-actions"><a class="text-button" href="03-workspace.html">OPEN →</a></div></article>
+              <article class="lot-stage zone-canonical"><span class="zone">Canonical</span><span data-ids="1b2c3d4e-5f60-4718-92a3-b4c5d6e7f809" data-kind="dataset"></span><small>v1 · 18 reports · 2 DQ runs</small><small>28 Oct · gate: 18 eligible / 0 rejected</small><div class="stage-actions"><a class="text-button" href="03-workspace.html">OPEN →</a></div></article>
+              <article class="lot-stage zone-dq_passed"><span class="zone">DQ passed</span><span data-ids="2c3d4e5f-6071-4829-a3b4-c5d6e7f8091a" data-kind="dataset"></span><small>v1 · 18 reports</small><small>29 Oct · a.sharma</small><div class="stage-actions"><a class="text-button" href="03-workspace.html">OPEN →</a></div></article>
+              <article class="lot-stage zone-enriched missing skipped"><span class="zone">Enriched</span><small><b>Not in this pipeline profile.</b></small><small>DQ passed publishes directly to Risk ready.</small></article>
+              <article class="lot-stage zone-risk_ready latest"><span class="zone">Risk ready</span><span data-ids="9f8b2c11-4d3e-4f5a-8b6c-7d8e9f0a1b2c" data-kind="dataset"></span><small>v1 · 18 reports · 1 risk run completed · 1 running</small><small>29 Oct · a.sharma · evidence set approved 5 Nov</small><div class="stage-actions"><a class="command" href="03-workspace.html">OPEN WORKSPACE</a></div></article>
+            </div>
+          </div>
+        </section>
+
+        <!-- Lot C: canonical current, DQ run failed -->
+        <section class="lot-group">
+          <div class="lot-head">
+            <div style="display:flex;gap:12px;align-items:flex-start">
+              <button class="lot-toggle" aria-label="Collapse lot">▾</button>
+              <div>
+                <p class="kicker">Intake lot · <span class="status warning">Needs attention</span></p>
+                <h2>demo-20260821-01</h2>
+                <div class="lot-meta"><span data-ids="3d4e5f60-7182-493a-b4c5-d6e7f8091a2b" data-kind="lot"></span><span>Received by <b>a.sharma</b></span><span>21 Aug 2026 10:05</span><span><b>4</b> reports</span><span>Current stage: <b>Canonical</b></span></div>
+              </div>
+            </div>
+            <div class="lot-actions"><a class="command" href="03-workspace.html#functions">RE-RUN DQ FUNCTIONS →</a></div>
+          </div>
+          <div class="lot-body">
+            <div class="callout danger" style="margin-top:0"><strong>Last DQ run failed</strong>check_completeness: source timeout (run <span data-ids="f00dbeef-9c1a-4a3e-8f52-6d2b1c7e9a44" data-kind="run"></span>, 15:41 today). The DQ gate needs a completed run before DQ passed can be published.</div>
+            <div class="lot-stage-list">
+              <article class="lot-stage zone-landing"><span class="zone">Landing</span><span data-ids="4e5f6071-8293-4a4b-c5d6-e7f8091a2b3c" data-kind="dataset"></span><small>v1 · 4 reports</small><small>21 Aug · a.sharma</small><div class="stage-actions"><a class="text-button" href="03-workspace.html">OPEN →</a></div></article>
+              <article class="lot-stage zone-canonical latest"><span class="zone">Canonical</span><span data-ids="5f607182-93a4-4b5c-d6e7-f8091a2b3c4d" data-kind="dataset"></span><small>v1 · 4 reports · last DQ run <span class="status failed">Failed</span></small><small>21 Aug · a.sharma</small><div class="stage-actions"><a class="command" href="03-workspace.html">OPEN WORKSPACE</a></div></article>
+              <article class="lot-stage zone-dq_passed missing"><span class="zone">DQ passed</span><small><b>DQ gate not yet evaluated.</b></small><small>Needs a completed data-quality run on the Canonical snapshot.</small></article>
+              <article class="lot-stage zone-enriched missing"><span class="zone">Enriched</span><small>Follows DQ passed.</small></article>
+              <article class="lot-stage zone-risk_ready missing"><span class="zone">Risk ready</span><small>Follows Enriched.</small></article>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <div class="pager"><span>Showing 3 of 3 lots</span><div class="pages"><button class="active">1</button></div></div>
+    </main>
+  </div>
+
+  <!-- ===== Redesigned Intake Lot dialog (brief §7.3) ===== -->
+  <dialog id="intakeDialog" class="wide">
+    <form method="dialog">
+      <div class="dialog-head"><div><p class="kicker">Create governed snapshots</p><h2>Intake lot</h2></div><button value="cancel" class="icon-button" aria-label="Close">×</button></div>
+      <p style="margin:0;color:var(--steel);font-size:13px">Creates one intake lot and its first two immutable snapshots: <b>Landing</b> (source-shaped records) and <b>Canonical</b> (mapped CbCR fields). Nothing is modified at the source.</p>
+
+      <div class="inline-fields">
+        <div class="field"><span>Source <span class="help" title="The configured database view the canonical records are read from. Only one source is active, so it is shown as context rather than a choice.">i</span></span><div style="font:14px var(--sans);text-transform:none;padding:8px;border:1px solid var(--line);background:var(--paper)">Local CbCR PostgreSQL <span class="muted">· adapter: postgresql_view</span></div></div>
+        <label>External lot reference <span class="help" title="A business-friendly name used to find this lot later. Strongly recommended: UUIDs are hard to recognise.">i</span><input placeholder="e.g. FY2024-Q4-batch-01" value="FY2024-Q4-batch-01"></label>
+      </div>
+
+      <div class="field"><span>Reports to include (optional) <span class="help" title="Record selection only — this is not a data-quality filter. Reports not listed are simply left out of this lot.">i</span></span>
+        <div class="radio-stack" style="text-transform:none">
+          <label class="selected"><input type="radio" name="reports" checked><span>All reports exposed by the source<small>10 reports are currently available from this source.</small></span></label>
+          <label><input type="radio" name="reports"><span>Select by report ID<small>Searchable multi-select. You can also paste a comma- or line-separated list; unknown or duplicate IDs are flagged before the lot is created.</small><input style="margin-top:6px" placeholder="Search or paste report IDs…" disabled></span></label>
+          <label><input type="radio" name="reports" disabled><span>Select by criteria <span class="status pending">Planned</span><small>Reporting period, reporting entity, jurisdiction, receipt date, message reference or source batch — when the source adapter supports it.</small></span></label>
+        </div>
+      </div>
+      <div class="callout ok" style="margin:0"><strong>Preview</strong>10 of 10 available reports will be included · 0 unknown IDs · 0 duplicates.</div>
+
+      <label>Intake note (optional)<textarea rows="2" placeholder="Purpose or operator context, stored in lot metadata"></textarea></label>
+
+      <details class="tech-details"><summary>Technical details</summary>
+        <dl class="kv"><dt>Pipeline profile</dt><dd>Ideal separated data zones <span class="muted">(only active profile; route Landing → Canonical → DQ passed → Enriched → Risk ready)</span></dd><dt>Source ID</dt><dd>local_cbcr_postgresql</dd><dt>Mapping</dt><dd>local_pg_v1</dd><dt>Submitted from</dt><dd>Standard UI</dd></dl>
+      </details>
+
+      <div class="dialog-actions"><button value="cancel" class="secondary">CANCEL</button><button class="command" data-toast="Lot FY2024-Q4-batch-01 queued — Landing and Canonical snapshots are being created. You will be taken to the Canonical workspace when ready.">CREATE LOT</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="mock.js"></script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Reports · CbCR Workbench (mockup)</title>
+  <link rel="stylesheet" href="base-niche.css">
+  <link rel="stylesheet" href="base-wip.css">
+  <link rel="stylesheet" href="base-reports.css">
+  <link rel="stylesheet" href="redesign.css">
+</head>
+<body class="wip" data-page="reports" data-default-persona="reviewer">
+  <header class="masthead" id="masthead"></header>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="Application navigation"></aside>
+    <main data-tabgroup>
+      <div class="mock-note"><b>Mockup 06 · Reports</b> (brief §7.8). A library of finalised case sets first; opening one shows a report header and two clearly separated tabs (<code>#cases</code>, <code>#lineage</code>). Preview, export and print are distinct: the page is the preview; Export is a menu; Print uses the existing print stylesheet.</div>
+
+      <div class="title-row">
+        <div><p class="kicker">Final governed outputs</p><h1>Reports</h1><p class="lede">Every finalised case set, with its selected-cases report and its processing and lineage report.</p></div>
+      </div>
+
+      <!-- ===== Library ===== -->
+      <section class="panel report-library">
+        <div class="panel-head"><div><p class="kicker">Library</p><h2>Finalised case sets</h2></div><button class="chevron" data-toggle="#libraryBody" aria-expanded="true" title="Collapse library">⌃</button></div>
+        <div id="libraryBody">
+          <div class="filter-bar" style="margin-bottom:12px">
+            <label class="grow">Find<input placeholder="Case-set name or ID, lot, dataset, reporting period"></label>
+            <label>Finalised<select><option>Last 90 days</option><option>Last 30 days</option><option>Custom…</option></select></label>
+            <label>Finalised by<select><option>Anyone permitted</option><option>Me</option></select></label>
+            <label>Selected cases<select><option>Any</option><option>1–5</option><option>6–20</option><option>&gt; 20</option></select></label>
+            <div class="actions"><button class="command">APPLY</button></div>
+          </div>
+          <div class="table-wrap"><table class="data-table">
+            <thead><tr><th>Case set</th><th>Lot · dataset</th><th>Reporting period</th><th class="num">Selected cases</th><th class="sort desc">Finalised</th><th>By</th><th></th></tr></thead>
+            <tbody>
+              <tr class="summary open"><td>Audit handoff 2026-10-28<br><span data-ids="4d4d4d4d-5e5e-4f6f-8a7a-8b8b9c9c0d0d" data-kind="case set"></span></td><td>FY2024-Q1-batch-01 · Risk ready v1</td><td>FY2024</td><td class="num">6</td><td class="nowrap">28 Oct 2026 16:20</td><td>r.mehta</td><td><a class="command" href="#cases" data-tab="cases">OPEN REPORTS</a></td></tr>
+              <tr class="summary"><td>Audit handoff 2026-09-30<br><span data-ids="3c3c3c3c-4d4d-4e5e-8f6f-7a7a8b8b9c9c" data-kind="case set"></span></td><td>FY2023-annual-batch-06 · Risk ready v1</td><td>FY2023</td><td class="num">11</td><td class="nowrap">30 Sep 2026 12:05</td><td>r.mehta</td><td><a class="secondary" href="#cases">OPEN REPORTS</a></td></tr>
+              <tr class="summary"><td>Audit handoff 2026-08-14<br><span data-ids="2b2b2b2b-3c3c-4d4d-8e5e-6f6f7a7a8b8b" data-kind="case set"></span></td><td>FY2023-annual-batch-05 · Risk ready v1</td><td>FY2023</td><td class="num">4</td><td class="nowrap">14 Aug 2026 10:48</td><td>demo</td><td><a class="secondary" href="#cases">OPEN REPORTS</a></td></tr>
+            </tbody></table></div>
+          <div class="pager"><span>3 case sets</span><div class="pages"><button class="active">1</button></div></div>
+        </div>
+      </section>
+
+      <!-- ===== Viewer ===== -->
+      <div class="report-heading" style="margin-top:28px">
+        <div><p class="kicker">Final case set</p><h2>Audit handoff 2026-10-28</h2><p>FY2024-Q1-batch-01 · Risk ready v1 · finalised 28 Oct 2026 16:20 by r.mehta · <span class="status completed">Finalised</span> · 6 selected cases</p><p><span data-ids="4d4d4d4d-5e5e-4f6f-8a7a-8b8b9c9c0d0d" data-kind="case set"></span> <span data-ids="8e7d6c5b-4a39-4281-9706-5f4e3d2c1b0a" data-kind="dataset"></span> <span data-ids="b2b2b2b2-c3c3-4d4d-9e5e-f6f6a7a7b8b8" data-kind="evidence set"></span></p></div>
+        <div style="display:flex;gap:8px;align-items:start">
+          <a class="secondary" href="05-cases.html">CASE WORKBENCH</a>
+          <div class="export-menu"><button class="secondary" data-menu="exportMenu" aria-haspopup="true" aria-expanded="false">EXPORT ▾</button>
+            <div class="menu" id="exportMenu" hidden><div class="menu-note">Selected cases</div><a href="#" data-toast="Downloading selected-cases-4d4d4d4d.csv">CSV</a><a href="#" data-toast="Downloading selected-cases-4d4d4d4d.json">JSON (structured)</a><div class="menu-sep"></div><div class="menu-note">Processing &amp; lineage</div><a href="#" data-toast="Downloading case-lineage-4d4d4d4d.csv">CSV</a><div class="menu-sep"></div><a href="#" onclick="window.print();return false">Print / PDF-friendly view</a></div>
+          </div>
+        </div>
+      </div>
+      <p class="muted" style="margin:-6px 0 12px;font-size:12px">Generated 6 Nov 2026 16:08 · filters: none · exported files carry the same timestamp and filter criteria in their header.</p>
+
+      <div class="workspace-tabs report-tabs" role="tablist">
+        <button class="active" data-tab="cases" role="tab">Selected cases report</button>
+        <button data-tab="lineage" role="tab">Processing and lineage report</button>
+      </div>
+
+      <!-- Tab: selected cases -->
+      <section id="tab-cases" class="report-tab active">
+        <section class="panel report-sheet">
+          <div class="metric-grid"><article class="metric"><span>Selected cases</span><strong>6</strong></article><article class="metric"><span>Reports in dataset</span><strong>22</strong></article><article class="metric"><span>Candidates reviewed</span><strong>14</strong></article><article class="metric"><span>Not selected / deferred</span><strong>6 / 2</strong></article></div>
+          <div class="filter-bar" style="margin-bottom:12px"><label class="grow">Find within cases<input placeholder="Report, entity, jurisdiction, reason code"></label><label>Reason code<select><option>Any</option><option>PROFIT_PRESENCE_MISMATCH</option><option>ETR_OUTLIER_LOW</option></select></label><label>Handoff status<select><option>Any</option><option>Handed off</option><option>In progress</option><option>Closed</option></select></label></div>
+          <div class="table-wrap"><table class="data-table">
+            <thead><tr><th></th><th>Audit case · report</th><th>Entity</th><th>Risk basis</th><th>Human decision</th><th>Handoff status</th></tr></thead>
+            <tbody>
+              <tr class="summary open"><td><button class="chevron">›</button></td><td><span data-ids="ac01ac01-1111-4222-8333-444455556666" data-kind="audit case"></span><br><strong>CBC-IN-2024-00005</strong></td><td>Solara Energy Ltd<br><small class="muted">IE-SOL-003 · IE</small></td><td><strong>PROFIT_PRESENCE_MISMATCH</strong> · score 0.90<br><small class="muted">analyze_profit_presence_mismatch</small></td><td>Selected — "High margin with 4 employees; refer."<br><small class="muted">r.mehta · 28 Oct 15:58</small></td><td><span class="status active">Handed off</span><br><small class="muted">ext ref AUD-2026-0142</small></td></tr>
+              <tr class="row-detail case-row-detail"><td colspan="6">
+                <div class="info-grid">
+                  <div><h4 style="margin:0 0 6px">Risk basis</h4><dl class="kv"><dt>Rule</dt><dd>PROFIT_PRESENCE_MISMATCH (severity high)</dd><dt>Evidence</dt><dd>profit before tax 142m · employees 4 · tangible assets 0.8m</dd><dt>Source run</dt><dd><span data-ids="66aa55bb-cc44-4dd5-9ee6-ff7700881100" data-kind="run"></span> · analyze_profit_presence_mismatch v1</dd><dt>Evidence set</dt><dd>Q1 risk evidence 2026-10-22 (approved by r.mehta)</dd></dl></div>
+                  <div><h4 style="margin:0 0 6px">Decision and handoff</h4><dl class="kv"><dt>Decision</dt><dd>Selected for audit handoff</dd><dt>Rationale</dt><dd>High margin with 4 employees; refer.</dd><dt>Decided by</dt><dd>r.mehta · 28 Oct 15:58</dd><dt>Handoff</dt><dd>Handed off 29 Oct · external reference AUD-2026-0142</dd></dl><a class="text-button" href="07-oversight.html?case=ac01ac01">FULL LINEAGE →</a></div>
+                </div>
+                <details class="tech-details"><summary>Technical details</summary><pre>{"audit_case_id":"ac01ac01-1111-4222-8333-444455556666","candidate_id":"…","source_run_ids":["66aa55bb-cc44-4dd5-9ee6-ff7700881100"],"score":0.90}</pre></details>
+              </td></tr>
+              <tr class="summary"><td><button class="chevron">›</button></td><td><span data-ids="ac02ac02-1111-4222-8333-444455556666" data-kind="audit case"></span><br><strong>CBC-IN-2024-00011</strong></td><td>Meridian Logistics BV<br><small class="muted">NL-MER-004 · NL</small></td><td><strong>ETR_OUTLIER_LOW</strong> · score 0.71<br><small class="muted">analyze_etr_outlier</small></td><td>Selected — "ETR 1.9 % unexplained."<br><small class="muted">r.mehta · 28 Oct 16:01</small></td><td><span class="status active">Handed off</span></td></tr>
+              <tr class="row-detail" hidden><td colspan="6"></td></tr>
+              <tr class="summary"><td><button class="chevron">›</button></td><td><span data-ids="ac03ac03-1111-4222-8333-444455556666" data-kind="audit case"></span><br><strong>CBC-IN-2024-00008</strong></td><td>Halden Marine Pte<br><small class="muted">SG-HAL-002 · SG</small></td><td><strong>PROFIT_PRESENCE_MISMATCH</strong> · score 0.84</td><td>Selected — "Substance review needed."<br><small class="muted">r.mehta · 28 Oct 16:03</small></td><td><span class="status pending">In progress</span></td></tr>
+              <tr class="row-detail" hidden><td colspan="6"></td></tr>
+              <tr><td colspan="6" class="muted">… 3 more selected cases</td></tr>
+            </tbody></table></div>
+        </section>
+      </section>
+
+      <!-- Tab: processing and lineage -->
+      <section id="tab-lineage" class="report-tab">
+        <section class="panel report-sheet">
+          <h3 style="margin:0 0 6px">Dataset ancestry</h3>
+          <div class="lineage-rail">
+            <article class="lineage-node"><span>1 · Landing</span><code>6f6f6f6f-0a1b-4c2d-8e3f-4a5b6c7d8e9f v1</code><small>Dataset created · 20 Oct 09:30</small></article>
+            <article class="lineage-node"><span>2 · Canonical</span><code>7a7a7a7a-1b2c-4d3e-9f40-5b6c7d8e9f0a v1</code><small>Mapped (local_pg_v1) · 20 Oct 09:31</small></article>
+            <article class="lineage-node"><span>3 · DQ passed</span><code>8b8b8b8b-2c3d-4e4f-a051-6c7d8e9f0a1b v1</code><small>Gate: 22 eligible / 0 rejected · 21 Oct</small></article>
+            <article class="lineage-node"><span>4 · Risk ready</span><code>8e7d6c5b-4a39-4281-9706-5f4e3d2c1b0a v1</code><small>Published unchanged · 20 Oct 14:05</small></article>
+          </div>
+
+          <h3 style="margin:18px 0 6px">Processing timeline <span class="help" title="Each stage expands to the runs, functions, effective parameters and findings recorded against it.">i</span></h3>
+          <div class="timeline">
+            <div class="tl-item"><div class="tl-head"><span class="zone">Canonical</span><strong>2 runs · 6 function executions</strong><div class="right">20–21 Oct<button class="chevron" data-toggle="next">›</button></div></div>
+              <div class="tl-body"><div class="table-wrap"><table><thead><tr><th>Run</th><th>Function</th><th>Status</th><th>Effective parameters</th><th>Result</th></tr></thead><tbody>
+                <tr><td><span data-ids="11aa22bb-33cc-4dd4-8ee5-ff6600771188" data-kind="run"></span></td><td>validate_receipt_identity v1</td><td><span class="status completed">Completed</span></td><td class="muted">none</td><td>22 reports · 0 findings</td></tr>
+                <tr><td><span data-ids="11aa22bb-33cc-4dd4-8ee5-ff6600771188" data-kind="run"></span></td><td>check_completeness v1</td><td><span class="status completed">Completed</span></td><td>required_fields: 5 (defaults) <details class="tech-details" style="margin-top:4px"><summary>JSON</summary><pre>{"required_fields":["revenue_unrelated","revenue_related","profit_before_tax","tax_paid","employees"]}</pre></details></td><td>22 reports · 0 findings</td></tr>
+                <tr><td><span data-ids="11aa22bb-33cc-4dd4-8ee5-ff6600771188" data-kind="run"></span></td><td>check_rpt_share_threshold v1</td><td><span class="status completed">Completed</span></td><td>threshold 0.5</td><td>3 warnings</td></tr>
+              </tbody></table></div></div>
+            </div>
+            <div class="tl-item zone-dq_passed"><div class="tl-head"><span class="zone">Promotion</span><strong>Canonical → DQ passed · 22 promoted · 0 rejected</strong><div class="right">21 Oct 10:12 · gate run 11aa22bb… · blocking: error<button class="chevron" data-toggle="next">›</button></div></div><div class="tl-body" hidden><dl class="kv"><dt>Reason</dt><dd>DQ gate evaluated; no errors</dd><dt>Evaluation</dt><dd><span data-ids="9d9d9d9d-aaaa-4bbb-8ccc-dddd1111eeee" data-kind="evaluation"></span></dd></dl></div></div>
+            <div class="tl-item zone-risk_ready"><div class="tl-head"><span class="zone">Promotion</span><strong>DQ passed → Risk ready · published unchanged</strong><div class="right">20 Oct 14:05<button class="chevron" data-toggle="next">›</button></div></div><div class="tl-body" hidden><dl class="kv"><dt>Reason</dt><dd>No enrichment required (profile: combined enrichment)</dd></dl></div></div>
+            <div class="tl-item zone-risk_ready"><div class="tl-head"><span class="zone">Risk ready</span><strong>1 risk run · 2 functions</strong><div class="right">22 Oct<button class="chevron" data-toggle="next">›</button></div></div><div class="tl-body" hidden><div class="table-wrap"><table><thead><tr><th>Run</th><th>Function</th><th>Status</th><th>Effective parameters</th><th>Result</th></tr></thead><tbody><tr><td><span data-ids="66aa55bb-cc44-4dd5-9ee6-ff7700881100" data-kind="run"></span></td><td>analyze_profit_presence_mismatch v1</td><td><span class="status completed">Completed</span></td><td>employee_floor 10 · profit_margin_cap 0.35</td><td>8 results</td></tr><tr><td><span data-ids="66aa55bb-cc44-4dd5-9ee6-ff7700881100" data-kind="run"></span></td><td>analyze_etr_outlier v1</td><td><span class="status completed">Completed</span></td><td>etr_floor 0.05</td><td>4 results</td></tr></tbody></table></div></div></div>
+            <div class="tl-item decision"><div class="tl-head"><span class="zone">Evidence set</span><strong>Q1 risk evidence 2026-10-22 · approved by r.mehta</strong><div class="right">22 Oct 17:00<button class="chevron" data-toggle="next">›</button></div></div><div class="tl-body" hidden><dl class="kv"><dt>Included runs</dt><dd>66aa55bb… (12 results)</dd><dt>Rationale</dt><dd>Both screens complete; approved for candidate generation.</dd><dt>Selection policy</dt><dd><details class="tech-details"><summary>JSON</summary><pre>{"source":"case_workbench"}</pre></details></dd></dl></div></div>
+            <div class="tl-item decision"><div class="tl-head"><span class="zone">Selection batch</span><strong>14 candidates generated · min score 0.60</strong><div class="right">23 Oct 09:15 · run c1c1c1c1…<button class="chevron" data-toggle="next">›</button></div></div><div class="tl-body" hidden><p>6 selected · 6 not selected · 2 deferred · all decisions by r.mehta between 27 and 28 Oct.</p></div></div>
+            <div class="tl-item decision"><div class="tl-head"><span class="zone">Final case set</span><strong>Audit handoff 2026-10-28 · 6 audit handoff cases</strong><div class="right">28 Oct 16:20 · r.mehta</div></div></div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="mock.js"></script>
+</body>
+</html>

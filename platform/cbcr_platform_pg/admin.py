@@ -88,8 +88,70 @@ class AdminService:
             (value.profile_id, value.name, value.route, value.storage_bindings, utc_now()),
         )
 
-    def lots(self) -> list[dict[str, Any]]:
-        rows = self.db.all("SELECT * FROM cbcr_control.lot ORDER BY received_at DESC")
+    def current_user(self, user_id: str) -> dict[str, Any] | None:
+        row = self.db.one(
+            """SELECT user_id,display_name,external_subject,active,created_at
+               FROM cbcr_control.user_account WHERE user_id=%s""",
+            (user_id,),
+        )
+        if not row:
+            return None
+        row["roles"] = [
+            value["role_id"]
+            for value in self.db.all(
+                """SELECT ur.role_id FROM cbcr_control.user_role ur
+                   JOIN cbcr_control.role r ON r.role_id=ur.role_id
+                   WHERE ur.user_id=%s AND r.active=true ORDER BY ur.role_id""",
+                (user_id,),
+            )
+        ]
+        return row
+
+    def lots(
+        self,
+        *,
+        owner: str | None = None,
+        status: str | None = None,
+        source_id: str | None = None,
+        query: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+        page: int = 1,
+        page_size: int = 100,
+    ) -> list[dict[str, Any]]:
+        clauses: list[str] = []
+        values: list[Any] = []
+        if owner:
+            clauses.append("l.received_by=%s")
+            values.append(owner)
+        if status:
+            clauses.append("l.status=%s")
+            values.append(status)
+        if source_id:
+            clauses.append("l.source_id=%s")
+            values.append(source_id)
+        if date_from:
+            clauses.append("l.received_at >= %s::timestamptz")
+            values.append(date_from)
+        if date_to:
+            clauses.append("l.received_at < (%s::date + interval '1 day')")
+            values.append(date_to)
+        if query:
+            clauses.append(
+                "(l.lot_id::text ILIKE %s OR COALESCE(l.external_lot_ref,'') ILIKE %s)"
+            )
+            needle = f"%{query}%"
+            values.extend((needle, needle))
+        where = " WHERE " + " AND ".join(clauses) if clauses else ""
+        values.extend((page_size, (page - 1) * page_size))
+        rows = self.db.all(
+            """SELECT l.*,s.name AS source_name
+               FROM cbcr_control.lot l
+               JOIN cbcr_control.source s ON s.source_id=l.source_id"""
+            + where
+            + " ORDER BY l.received_at DESC LIMIT %s OFFSET %s",
+            tuple(values),
+        )
         for row in rows:
             row["lot_id"] = str(row["lot_id"])
         return rows
@@ -137,14 +199,29 @@ class AdminService:
                 component["component_id"] = str(component["component_id"])
         return rows
 
-    def selection_batches(self) -> list[dict[str, Any]]:
+    def selection_batches(self, owner: str | None = None) -> list[dict[str, Any]]:
         rows = self.db.all(
             """SELECT sb.*,rs.name AS risk_result_set_name,
-                      rs.status AS risk_result_set_status
+                      rs.status AS risk_result_set_status,l.external_lot_ref,
+                      (SELECT COUNT(*) FROM cbcr_selection.candidate c
+                       WHERE c.selection_batch_id=sb.selection_batch_id) AS candidate_count,
+                      (SELECT COUNT(*) FROM cbcr_selection.candidate c
+                       WHERE c.selection_batch_id=sb.selection_batch_id AND c.decision='pending') AS pending_count,
+                      (SELECT COUNT(*) FROM cbcr_selection.candidate c
+                       WHERE c.selection_batch_id=sb.selection_batch_id AND c.decision='selected') AS selected_count,
+                      (SELECT COUNT(*) FROM cbcr_selection.candidate c
+                       WHERE c.selection_batch_id=sb.selection_batch_id AND c.decision='not_selected') AS not_selected_count,
+                      (SELECT COUNT(*) FROM cbcr_selection.candidate c
+                       WHERE c.selection_batch_id=sb.selection_batch_id AND c.decision='deferred') AS deferred_count
                FROM cbcr_selection.selection_batch sb
+               JOIN cbcr_control.dataset d
+                 ON d.dataset_id=sb.dataset_id AND d.version=sb.dataset_version
+               JOIN cbcr_control.lot l ON l.lot_id=d.lot_id
                LEFT JOIN cbcr_risk.result_set rs
                  ON rs.result_set_id=sb.risk_result_set_id
+               WHERE (%s IS NULL OR l.received_by=%s)
                ORDER BY sb.created_at DESC"""
+            , (owner, owner)
         )
         for row in rows:
             for key in ("selection_batch_id", "run_id", "dataset_id", "risk_result_set_id"):
@@ -152,11 +229,37 @@ class AdminService:
                     row[key] = str(row[key])
         return rows
 
-    def selection_candidates(self, batch_id: str) -> list[dict[str, Any]]:
+    def selection_candidates(
+        self,
+        batch_id: str,
+        *,
+        decision: str | None = None,
+        minimum_score: float | None = None,
+        query: str | None = None,
+        page: int = 1,
+        page_size: int = 100,
+    ) -> list[dict[str, Any]]:
+        clauses = ["selection_batch_id=%s"]
+        values: list[Any] = [batch_id]
+        if decision:
+            clauses.append("decision=%s")
+            values.append(decision)
+        if minimum_score is not None:
+            clauses.append("score >= %s")
+            values.append(minimum_score)
+        if query:
+            clauses.append(
+                "(report_id ILIKE %s OR COALESCE(entity_id,'') ILIKE %s "
+                "OR COALESCE(entity_name,'') ILIKE %s OR reason_code ILIKE %s)"
+            )
+            needle = f"%{query}%"
+            values.extend((needle, needle, needle, needle))
+        values.extend((page_size, (page - 1) * page_size))
         rows = self.db.all(
-            """SELECT * FROM cbcr_selection.candidate
-               WHERE selection_batch_id=%s ORDER BY report_id,candidate_id""",
-            (batch_id,),
+            "SELECT * FROM cbcr_selection.candidate WHERE "
+            + " AND ".join(clauses)
+            + " ORDER BY report_id,candidate_id LIMIT %s OFFSET %s",
+            tuple(values),
         )
         for row in rows:
             row["candidate_id"] = str(row["candidate_id"])
@@ -255,6 +358,20 @@ class AdminService:
                 new_uuid(), actor, "SAVE_USER", f"user:{value.user_id}", "allowed", session=tx
             )
 
+    def set_user_active(self, user_id: str, active: bool, actor: str) -> None:
+        with self.db.transaction() as tx:
+            row = tx.one(
+                """UPDATE cbcr_control.user_account SET active=%s
+                   WHERE user_id=%s RETURNING user_id""",
+                (active, user_id),
+            )
+            if not row:
+                raise AdminNotFound("user not found")
+            self.db.audit(
+                new_uuid(), actor, "SET_USER_ACTIVE", f"user:{user_id}", "allowed",
+                detail={"active": active}, session=tx,
+            )
+
     def assign_roles(self, user_id: str, value: RoleAssignment, actor: str) -> int:
         known = {
             row["role_id"]
@@ -287,12 +404,82 @@ class AdminService:
             )
         return len(value.role_ids)
 
-    def audit(self, limit: int) -> list[dict[str, Any]]:
+    def audit(
+        self,
+        limit: int,
+        *,
+        actor: str | None = None,
+        role: str | None = None,
+        action: str | None = None,
+        decision: str | None = None,
+        target: str | None = None,
+        date_from: str | None = None,
+        date_to: str | None = None,
+        page: int = 1,
+    ) -> list[dict[str, Any]]:
+        clauses: list[str] = []
+        values: list[Any] = []
+        if actor:
+            clauses.append("ae.actor=%s")
+            values.append(actor)
+        if role:
+            clauses.append(
+                "EXISTS(SELECT 1 FROM cbcr_control.user_role ur "
+                "WHERE ur.user_id=ae.actor AND ur.role_id=%s)"
+            )
+            values.append(role)
+        if action:
+            clauses.append("ae.action=%s")
+            values.append(action)
+        if decision:
+            clauses.append("ae.decision=%s")
+            values.append(decision)
+        if target:
+            clauses.append("ae.resource ILIKE %s")
+            values.append(f"%{target}%")
+        if date_from:
+            clauses.append("ae.created_at >= %s::timestamptz")
+            values.append(date_from)
+        if date_to:
+            clauses.append("ae.created_at < (%s::date + interval '1 day')")
+            values.append(date_to)
+        where = " WHERE " + " AND ".join(clauses) if clauses else ""
+        values.extend((limit, (page - 1) * limit))
         rows = self.db.all(
-            """SELECT * FROM cbcr_control.audit_event
-               ORDER BY created_at DESC LIMIT %s""",
-            (limit,),
+            """SELECT ae.*,
+                      COALESCE((SELECT jsonb_agg(ur.role_id ORDER BY ur.role_id)
+                                FROM cbcr_control.user_role ur
+                                WHERE ur.user_id=ae.actor),'[]'::jsonb) AS roles
+               FROM cbcr_control.audit_event ae"""
+            + where
+            + " ORDER BY ae.created_at DESC LIMIT %s OFFSET %s",
+            tuple(values),
         )
         for row in rows:
             row["event_id"] = str(row["event_id"])
         return rows
+
+    def lookup(self, value: str) -> dict[str, Any] | None:
+        probes = (
+            ("lot", "SELECT lot_id::text AS id FROM cbcr_control.lot WHERE lot_id::text=%s OR external_lot_ref=%s LIMIT 1", "/lifecycle?lot={id}"),
+            ("dataset", "SELECT dataset_id::text AS id,version FROM cbcr_control.dataset WHERE dataset_id::text=%s ORDER BY version DESC LIMIT 1", "/datasets/{id}/v{version}/overview"),
+            ("run", "SELECT run_id::text AS id FROM cbcr_control.run WHERE run_id::text=%s LIMIT 1", "/runs/{id}"),
+            ("risk_result_set", "SELECT result_set_id::text AS id,dataset_id::text AS dataset_id,dataset_version FROM cbcr_risk.result_set WHERE result_set_id::text=%s LIMIT 1", "/cases/{dataset_id}/v{dataset_version}/3?set={id}"),
+            ("selection_batch", "SELECT selection_batch_id::text AS id,dataset_id::text AS dataset_id,dataset_version FROM cbcr_selection.selection_batch WHERE selection_batch_id::text=%s LIMIT 1", "/cases/{dataset_id}/v{dataset_version}/4?batch={id}"),
+            ("case_set", "SELECT case_set_id::text AS id FROM cbcr_selection.case_set WHERE case_set_id::text=%s LIMIT 1", "/reports/{id}/selected"),
+            ("audit_case", "SELECT audit_case_id::text AS id FROM cbcr_selection.audit_case WHERE audit_case_id::text=%s LIMIT 1", "/oversight/lineage?case={id}"),
+        )
+        for kind, sql, route in probes:
+            parameters = (value, value) if kind == "lot" else (value,)
+            row = self.db.one(sql, parameters)
+            if row:
+                return {
+                    "type": kind,
+                    "id": row["id"],
+                    "route": route.format(
+                        id=row["id"], version=row.get("version", 1),
+                        dataset_id=row.get("dataset_id", ""),
+                        dataset_version=row.get("dataset_version", 1),
+                    ),
+                }
+        return None

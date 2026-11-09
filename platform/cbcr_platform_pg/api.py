@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from contextlib import asynccontextmanager
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Annotated
 
@@ -27,6 +29,7 @@ from cbcr_platform.contracts import (
     SelectionDecisionRequest,
     SourceCreate,
     UserCreate,
+    UserStatusRequest,
 )
 from cbcr_platform.dictionary import canonical_dictionary
 from cbcr_platform.function_library import HANDLERS
@@ -106,9 +109,74 @@ def require_case_view(user: str) -> None:
         raise HTTPException(403, "case and audit access denied")
 
 
+def broad_visibility(user: str) -> bool:
+    return bool(
+        container.access.decide(user, "manage_access").allowed
+        or container.access.decide(user, "view_audit").allowed
+    )
+
+
+def case_broad_visibility(user: str) -> bool:
+    return bool(
+        broad_visibility(user)
+        or container.access.decide(
+            user, "manage_selection", stage="07", purpose="case_review"
+        ).allowed
+    )
+
+
+def requested_case_owner(user: str, scope: str | None) -> str | None:
+    if scope == "all" and case_broad_visibility(user):
+        return None
+    return requested_owner(user, scope)
+
+
+def requested_owner(user: str, scope: str | None, owner: str | None = None) -> str | None:
+    broad = broad_visibility(user)
+    if owner and not broad and owner != user:
+        raise HTTPException(403, "cross-user scope requires audit or access-management permission")
+    if owner:
+        return owner
+    if scope == "all":
+        if not broad:
+            raise HTTPException(403, "all-user scope requires audit or access-management permission")
+        return None
+    if scope and scope.startswith("user:"):
+        selected = scope.split(":", 1)[1]
+        if not broad and selected != user:
+            raise HTTPException(403, "cross-user scope requires audit or access-management permission")
+        return selected
+    if scope == "me" or not broad:
+        return user
+    return None
+
+
 @app.get("/", include_in_schema=False)
 def index():
+    return FileResponse(static_root / "standard.html")
+
+
+@app.get("/advanced", include_in_schema=False)
+def advanced_index():
     return FileResponse(static_root / "index.html")
+
+
+@app.get("/lifecycle", include_in_schema=False)
+@app.get("/runs", include_in_schema=False)
+@app.get("/runs/{run_id}", include_in_schema=False)
+@app.get("/datasets/{dataset_id}/v{version}/{tab}", include_in_schema=False)
+@app.get("/cases", include_in_schema=False)
+@app.get("/cases/{dataset_id}/v{version}/{step}", include_in_schema=False)
+@app.get("/reports", include_in_schema=False)
+@app.get("/reports/{case_set_id}/{tab}", include_in_schema=False)
+@app.get("/oversight", include_in_schema=False)
+@app.get("/oversight/{tab}", include_in_schema=False)
+@app.get("/reference", include_in_schema=False)
+@app.get("/settings", include_in_schema=False)
+@app.get("/settings/{section}", include_in_schema=False)
+def standard_ui():
+    """Serve browser-history routes for the standard control-plane UI."""
+    return FileResponse(static_root / "standard.html")
 
 
 @app.get("/api/v1/health")
@@ -119,12 +187,37 @@ def health():
         "version": app.version,
         "persistence_backend": "postgresql",
         "database": identity,
+        "worker_status": "available",
+        "ui_impersonation": os.getenv("CBCR_UI_IMPERSONATION", "0") == "1",
         "source_connectors": {
             "fixture-json": "active",
             "postgresql-canonical": "active",
             "database-api": "extension_boundary",
         },
     }
+
+
+@app.get("/api/v1/me")
+def me(user: Annotated[str, Depends(actor)]):
+    value = container.admin.current_user(user)
+    if not value or not value["active"]:
+        raise HTTPException(403, "active application user not found")
+    value["persona"] = (
+        "Administrator" if "platform_admin" in value["roles"] else
+        "Auditor" if "auditor" in value["roles"] else
+        "Case Reviewer" if "case_manager" in value["roles"] else
+        "Analyst"
+    )
+    return value
+
+
+@app.get("/api/v1/impersonation-users", include_in_schema=False)
+def impersonation_users(user: Annotated[str, Depends(actor)]):
+    if os.getenv("CBCR_UI_IMPERSONATION", "0") != "1":
+        raise HTTPException(404, "UI impersonation is disabled")
+    if not container.admin.current_user(user):
+        raise HTTPException(403, "active application user not found")
+    return container.admin.users()
 
 
 @app.get("/api/v1/sources")
@@ -267,9 +360,23 @@ def ingest_lot(value: LotIngestRequest, user: Annotated[str, Depends(actor)]):
 
 
 @app.get("/api/v1/lots")
-def lots(user: Annotated[str, Depends(actor)]):
+def lots(
+    user: Annotated[str, Depends(actor)],
+    scope: str | None = None,
+    owner: str | None = None,
+    status: str | None = None,
+    source_id: str | None = None,
+    q: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(100, ge=1, le=500),
+):
     require(user, "view_datasets")
-    return container.admin.lots()
+    return container.admin.lots(
+        owner=requested_owner(user, scope, owner), status=status, source_id=source_id,
+        query=q, date_from=date_from, date_to=date_to, page=page, page_size=page_size,
+    )
 
 
 @app.get("/api/v1/datasets")
@@ -277,9 +384,27 @@ def datasets(
     user: Annotated[str, Depends(actor)],
     lot_id: str | None = None,
     zone: str | None = None,
+    scope: str | None = None,
+    owner: str | None = None,
+    status: str | None = None,
+    q: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(100, ge=1, le=500),
 ):
     require(user, "view_datasets")
-    return container.data_plane.list_datasets(lot_id, zone)
+    if scope == "case_workbench":
+        require_case_view(user)
+        if zone != "risk_ready":
+            raise HTTPException(422, "case_workbench scope is limited to risk_ready datasets")
+        selected_owner = None
+    else:
+        selected_owner = requested_owner(user, scope, owner)
+    return container.data_plane.list_datasets(
+        lot_id, zone, owner=selected_owner, status=status,
+        query=q, date_from=date_from, date_to=date_to, page=page, page_size=page_size,
+    )
 
 
 @app.get("/api/v1/datasets/{dataset_id}/versions/{version}")
@@ -447,9 +572,29 @@ def create_run(value: RunRequest, user: Annotated[str, Depends(actor)]):
 
 
 @app.get("/api/v1/runs")
-def list_runs(user: Annotated[str, Depends(actor)]):
+def list_runs(
+    user: Annotated[str, Depends(actor)],
+    scope: str | None = None,
+    owner: str | None = None,
+    status: str | None = None,
+    purpose: str | None = None,
+    function_code: str | None = None,
+    input_zone: str | None = None,
+    dataset_id: str | None = None,
+    lot_id: str | None = None,
+    q: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(100, ge=1, le=500),
+):
     visible = []
-    for summary in container.runs.list():
+    for summary in container.runs.list(
+        owner=requested_owner(user, scope, owner), status=status, purpose=purpose,
+        function_code=function_code, input_zone=input_zone, dataset_id=dataset_id,
+        lot_id=lot_id, query=q, date_from=date_from, date_to=date_to,
+        page=page, page_size=page_size,
+    ):
         value = container.runs.get(summary["run_id"])
         if value and may_view_run(user, value):
             visible.append(summary)
@@ -486,9 +631,11 @@ def risk_results(
 
 
 @app.get("/api/v1/selection-batches")
-def selection_batches(user: Annotated[str, Depends(actor)]):
+def selection_batches(
+    user: Annotated[str, Depends(actor)], scope: str | None = None
+):
     require(user, "view_results", stage="07", purpose="case_review")
-    return container.admin.selection_batches()
+    return container.admin.selection_batches(requested_case_owner(user, scope))
 
 
 @app.get("/api/v1/datasets/{dataset_id}/versions/{version}/risk-runs")
@@ -501,10 +648,11 @@ def completed_risk_runs(
 
 @app.get("/api/v1/risk-result-sets")
 def risk_result_sets(
-    user: Annotated[str, Depends(actor)], dataset_id: str | None = None
+    user: Annotated[str, Depends(actor)], dataset_id: str | None = None,
+    scope: str | None = None,
 ):
     require_case_view(user)
-    return container.risk_result_sets.list(dataset_id)
+    return container.risk_result_sets.list(dataset_id, requested_case_owner(user, scope))
 
 
 @app.post("/api/v1/risk-result-sets", status_code=201)
@@ -543,9 +691,20 @@ def approve_risk_result_set(
 
 
 @app.get("/api/v1/selection-batches/{batch_id}/candidates")
-def selection_candidates(batch_id: str, user: Annotated[str, Depends(actor)]):
+def selection_candidates(
+    batch_id: str,
+    user: Annotated[str, Depends(actor)],
+    decision: str | None = None,
+    min_score: float | None = None,
+    q: str | None = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(100, ge=1, le=500),
+):
     require(user, "view_results", stage="07", purpose="case_review")
-    return container.admin.selection_candidates(batch_id)
+    return container.admin.selection_candidates(
+        batch_id, decision=decision, minimum_score=min_score, query=q,
+        page=page, page_size=page_size,
+    )
 
 
 @app.post("/api/v1/selection-batches/{batch_id}/finalize", status_code=201)
@@ -562,9 +721,9 @@ def finalize_selection_batch(
 
 
 @app.get("/api/v1/case-sets")
-def case_sets(user: Annotated[str, Depends(actor)]):
+def case_sets(user: Annotated[str, Depends(actor)], scope: str | None = None):
     require_case_view(user)
-    return container.case_handoff.case_sets()
+    return container.case_handoff.case_sets(requested_case_owner(user, scope))
 
 
 @app.get("/api/v1/case-sets/{case_set_id}")
@@ -610,6 +769,22 @@ def selected_cases_report_csv(case_set_id: str, user: Annotated[str, Depends(act
     )
 
 
+@app.get("/api/v1/case-sets/{case_set_id}/reports/selected-cases.pdf")
+def selected_cases_report_pdf(case_set_id: str, user: Annotated[str, Depends(actor)]):
+    require_case_view(user)
+    try:
+        content = container.reports.selected_cases_pdf(case_set_id)
+    except CaseReportError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    return Response(
+        content=content,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="selected-cases-{case_set_id}.pdf"'
+        },
+    )
+
+
 @app.get("/api/v1/case-sets/{case_set_id}/reports/lineage")
 def case_set_lineage_report(case_set_id: str, user: Annotated[str, Depends(actor)]):
     require_case_view(user)
@@ -631,6 +806,22 @@ def case_set_lineage_report_csv(case_set_id: str, user: Annotated[str, Depends(a
         media_type="text/csv; charset=utf-8",
         headers={
             "Content-Disposition": f'attachment; filename="case-lineage-{case_set_id}.csv"'
+        },
+    )
+
+
+@app.get("/api/v1/case-sets/{case_set_id}/reports/lineage.pdf")
+def case_set_lineage_report_pdf(case_set_id: str, user: Annotated[str, Depends(actor)]):
+    require_case_view(user)
+    try:
+        content = container.reports.lineage_pdf(case_set_id)
+    except CaseReportError as exc:
+        raise HTTPException(404, str(exc)) from exc
+    return Response(
+        content=content,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f'attachment; filename="case-lineage-{case_set_id}.pdf"'
         },
     )
 
@@ -722,9 +913,133 @@ def assign_roles(
     return {"user_id": user_id, "role_count": count}
 
 
+@app.put("/api/v1/users/{user_id}/status")
+def set_user_status(
+    user_id: str, value: UserStatusRequest, user: Annotated[str, Depends(actor)]
+):
+    require(user, "manage_access")
+    if user_id == user and not value.active:
+        raise HTTPException(422, "the current user cannot deactivate itself")
+    try:
+        container.admin.set_user_active(user_id, value.active, user)
+    except AdminNotFound as exc:
+        raise HTTPException(404, str(exc)) from exc
+    return {"user_id": user_id, "active": value.active}
+
+
 @app.get("/api/v1/audit")
 def audit(
-    user: Annotated[str, Depends(actor)], limit: int = Query(100, ge=1, le=1000)
+    user: Annotated[str, Depends(actor)],
+    limit: int = Query(100, ge=1, le=1000),
+    actor_id: str | None = Query(None, alias="actor"),
+    role: str | None = None,
+    action: str | None = None,
+    outcome: str | None = None,
+    target: str | None = None,
+    date_from: str | None = None,
+    date_to: str | None = None,
+    page: int = Query(1, ge=1),
 ):
     require(user, "view_audit")
-    return container.admin.audit(limit)
+    return container.admin.audit(
+        limit, actor=actor_id, role=role, action=action, decision=outcome,
+        target=target, date_from=date_from, date_to=date_to, page=page,
+    )
+
+
+@app.get("/api/v1/lookup")
+def lookup(value: str, user: Annotated[str, Depends(actor)]):
+    require(user, "view_datasets")
+    result = container.admin.lookup(value.strip())
+    if not result:
+        raise HTTPException(404, "identifier or reference not found")
+    return result
+
+
+@app.get("/api/v1/dashboard")
+def dashboard(
+    user: Annotated[str, Depends(actor)],
+    scope: str | None = None,
+    days: int = Query(30, ge=1, le=366),
+):
+    require(user, "view_datasets")
+    owner = requested_owner(user, scope)
+    date_from = (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+    runs = container.runs.list(owner=owner, date_from=date_from, page_size=500)
+    workflow_runs = container.runs.list(owner=owner, page_size=500)
+    datasets = container.data_plane.list_datasets(owner=owner, page_size=500)
+    active = [run for run in runs if run["status"] in {"queued", "running"}]
+    failed = [run for run in runs if run["status"] in {"failed", "completed_with_errors"}]
+    parent_keys = {
+        (item.get("parent_dataset_id"), item.get("parent_version"))
+        for item in datasets if item.get("parent_dataset_id")
+    }
+    latest = [
+        item for item in datasets
+        if (item["dataset_id"], item["version"]) not in parent_keys
+    ]
+    completed_dq = {
+        (run["dataset_id"], run["dataset_version"])
+        for run in workflow_runs
+        if run["purpose"] == "data_quality"
+        and run["status"] in {"completed", "completed_with_errors"}
+    }
+    awaiting_dq_run = [
+        item for item in latest if item["zone"] == "canonical"
+        and (item["dataset_id"], item["version"]) not in completed_dq
+    ]
+    awaiting_dq_gate = [
+        item for item in latest if item["zone"] == "canonical"
+        and (item["dataset_id"], item["version"]) in completed_dq
+    ]
+    approved_evidence = {
+        (str(row["dataset_id"]), row["dataset_version"])
+        for row in container.db.all(
+            "SELECT dataset_id,dataset_version FROM cbcr_risk.result_set WHERE status='approved'"
+        )
+    }
+    cards = {
+        "failed_runs": len(failed),
+        "active_runs": len(active),
+        "awaiting_dq_run": len(awaiting_dq_run),
+        "awaiting_dq_gate": len(awaiting_dq_gate),
+        "awaiting_publication": sum(1 for item in latest if item["zone"] in {"dq_passed", "enriched"}),
+        "risk_ready": sum(1 for item in latest if item["zone"] == "risk_ready"),
+        "awaiting_evidence_approval": sum(
+            1 for item in latest if item["zone"] == "risk_ready"
+            and (item["dataset_id"], item["version"]) not in approved_evidence
+        ),
+        "pending_case_decisions": 0,
+    }
+    if container.access.decide(user, "view_results", stage="07", purpose="case_review").allowed:
+        where = "WHERE c.decision='pending' AND b.status='open'"
+        params: tuple[object, ...] = ()
+        if owner:
+            where += " AND l.received_by=%s"
+            params = (owner,)
+        cards["pending_case_decisions"] = int(
+            container.db.one(
+                f"""SELECT COUNT(*) AS count
+                    FROM cbcr_selection.candidate c
+                    JOIN cbcr_selection.selection_batch b ON b.selection_batch_id=c.selection_batch_id
+                    JOIN cbcr_control.dataset d
+                      ON d.dataset_id=b.dataset_id AND d.version=b.dataset_version
+                    JOIN cbcr_control.lot l ON l.lot_id=d.lot_id
+                    {where}""",
+                params,
+            )["count"]
+        )
+    by_zone = {zone: sum(1 for item in datasets if item["zone"] == zone) for zone in (
+        "landing", "canonical", "dq_passed", "enriched", "risk_ready"
+    )}
+    by_status = {status: sum(1 for item in runs if item["status"] == status) for status in (
+        "queued", "running", "completed", "completed_with_errors", "failed"
+    )}
+    return {
+        "period_days": days,
+        "scope": scope or ("all" if owner is None else "me"),
+        "cards": cards,
+        "lots_by_zone": by_zone,
+        "runs_by_status": by_status,
+        "recent_runs": runs[:6],
+    }

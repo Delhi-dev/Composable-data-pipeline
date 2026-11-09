@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CbCR UI redesign · mockup index</title>
+  <link rel="stylesheet" href="base-niche.css">
+  <link rel="stylesheet" href="base-wip.css">
+  <link rel="stylesheet" href="base-reports.css">
+  <link rel="stylesheet" href="redesign.css">
+</head>
+<body class="wip" data-page="index" data-default-persona="admin">
+  <header class="masthead" id="masthead"></header>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="Application navigation"></aside>
+    <main>
+      <div class="mock-note"><b>Mockup index.</b> Static HTML/CSS/JS mockups for the simplified CbCR UI. They reuse the product's own stylesheets (<code>base-niche.css</code> and <code>base-wip.css</code> are verbatim copies of <code>web/niche.css</code> and <code>web/wip-workbench.css</code>) plus <code>redesign.css</code> for new components. The yellow bar switches persona (navigation is derived from roles) and theme. The accompanying document is <code>../UI_REDESIGN_PROPOSAL.md</code>.</div>
+
+      <div class="title-row"><div><p class="kicker">Simplified standard interface</p><h1>Mockups</h1><p class="lede">Five primary pages plus Oversight for auditors and administrators; everything else is contextual or lives under Utilities.</p></div></div>
+
+      <div class="table-wrap"><table class="data-table">
+        <thead><tr><th>#</th><th>Mockup</th><th>Replaces / changes</th><th>Shows</th><th>Default persona</th></tr></thead>
+        <tbody>
+          <tr><td>01</td><td><a href="01-home.html"><strong>Home</strong></a></td><td>Work queue</td><td>Role-scoped attention cards that deep-link to filtered pages, scoped recent activity, three small actionable reports, status dot instead of a health panel</td><td>Analyst</td></tr>
+          <tr><td>02</td><td><a href="02-lifecycle.html"><strong>Data lifecycle</strong></a> + <a href="02-lifecycle.html#intake">Intake lot dialog</a></td><td>Data lifecycle, Intake dialog</td><td>Collapsible per-lot stage timelines with reasons for missing stages, next permitted action, full filter bar, redesigned intake dialog with report selection modes and preview count</td><td>Analyst</td></tr>
+          <tr><td>03</td><td><a href="03-workspace.html"><strong>Dataset workspace</strong></a></td><td>Dataset workspace (no longer a nav entry)</td><td>Breadcrumb, banner with ID chips, stage stepper, recommended next action with prerequisites, grouped function picker with purpose lock and pre-queue summary, server-loaded results, zone-named publication tab, confirmation dialogs, DQ-gate variant</td><td>Analyst</td></tr>
+          <tr><td>04</td><td><a href="04-runs.html"><strong>Run history</strong></a></td><td>Run history</td><td>Inline accordion inspection below the row, scope and extended filters, sortable columns, per-run actions</td><td>Analyst</td></tr>
+          <tr><td>05</td><td><a href="05-cases.html"><strong>Case workbench</strong></a></td><td>Case workbench</td><td>Master–detail: case pipelines on the left, six-step guided flow on the right; contextual candidate generation; evidence summaries; modal approvals; readiness checklist</td><td>Case Reviewer</td></tr>
+          <tr><td>06</td><td><a href="06-reports.html"><strong>Reports</strong></a></td><td>Final reports</td><td>Case-set library, report header, two tabs (selected cases / processing &amp; lineage), export menu, expandable case rows, stage timeline for lineage</td><td>Case Reviewer</td></tr>
+          <tr><td>07</td><td><a href="07-oversight.html"><strong>Oversight</strong></a></td><td>Lineage &amp; audit</td><td>Independent lookup by any ID, end-to-end stage timeline, access/action audit with filters and an Allowed/Denied explanation</td><td>Auditor</td></tr>
+          <tr><td>08</td><td><a href="08-settings.html"><strong>Settings</strong></a></td><td>Administration (moved out of primary nav)</td><td>Users &amp; access with create/roles dialogs, data sources with test connection, versioned pipeline profiles, function configuration, system status</td><td>Administrator</td></tr>
+          <tr><td>09</td><td><a href="09-function-reference.html"><strong>Function reference</strong></a></td><td>Function catalogue (moved to Utilities / Help)</td><td>Searchable read-only reference with plain-language inputs, outputs and applicable zones</td><td>Analyst</td></tr>
+        </tbody></table></div>
+
+      <div class="two-column" style="margin-top:24px">
+        <section class="panel"><p class="kicker">Shared components (see redesign.css / mock.js)</p>
+          <ul style="margin:8px 0 0;padding-left:18px;font-size:13px;line-height:1.6">
+            <li><b>ID chip</b> — <span data-ids="294835a6-0c7d-4e8f-a1b2-c3d4e5f60718" data-kind="dataset"></span> click to expand, COPY to copy, tooltip holds the full ID</li>
+            <li><b>Stage stepper</b> (horizontal and vertical) — done / current / future / blocked / skipped</li>
+            <li><b>Filter bar</b> with scope segmented control, "More filters", active-filter chips and URL mirror</li>
+            <li><b>Accordion rows</b> in tables (<code>tr.summary</code> + <code>tr.row-detail</code>) and cards (<code>.run-card .body</code>)</li>
+            <li><b>Help icon</b> <span class="help" title="Example tooltip">i</span>, <b>callouts</b>, <b>empty states</b> with a next action, <b>next-action panel</b> with prerequisites</li>
+            <li><b>Confirmation dialogs</b> with a summary table (replaces <code>window.prompt</code>)</li>
+            <li><b>Technical details</b> expander (<code>&lt;details&gt;</code>) that keeps raw JSON available but out of the way</li>
+          </ul>
+        </section>
+        <section class="panel"><p class="kicker">Navigation by persona</p>
+          <div class="table-wrap"><table><thead><tr><th>Entry</th><th>Analyst</th><th>Case Reviewer</th><th>Auditor</th><th>Admin</th></tr></thead><tbody>
+            <tr><td>Home</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Data lifecycle</td><td>own</td><td>read</td><td>all</td><td>all</td></tr>
+            <tr><td>Run history</td><td>own</td><td>relevant</td><td>all</td><td>all</td></tr>
+            <tr><td>Case workbench</td><td>if role</td><td>✓</td><td>read</td><td>✓</td></tr>
+            <tr><td>Reports</td><td>permitted</td><td>✓</td><td>all</td><td>all</td></tr>
+            <tr><td>Oversight</td><td>—</td><td>—</td><td>✓</td><td>✓</td></tr>
+            <tr><td>Function reference</td><td>read</td><td>read</td><td>read</td><td>manage</td></tr>
+            <tr><td>Settings</td><td>—</td><td>—</td><td>—</td><td>✓</td></tr>
+            <tr><td>Advanced operations</td><td>flag</td><td>flag</td><td>✓</td><td>✓</td></tr>
+          </tbody></table></div>
+          <p class="muted" style="font-size:12px">Try it: change the persona in the yellow bar and watch the sidebar and the role-scoped elements change.</p>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="mock.js"></script>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Home · CbCR Workbench (mockup)</title>
+  <link rel="stylesheet" href="base-niche.css">
+  <link rel="stylesheet" href="base-wip.css">
+  <link rel="stylesheet" href="base-reports.css">
+  <link rel="stylesheet" href="redesign.css">
+</head>
+<body class="wip" data-page="home" data-default-persona="analyst">
+  <header class="masthead" id="masthead"></header>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="Application navigation"></aside>
+    <main>
+      <div class="mock-note"><b>Mockup 01 · Home</b> (replaces "Work queue"; brief §7.2). Every card is a link to a pre-filtered page. Technical health moved to the status dot in the masthead. Counts are illustrative. Switch persona in the yellow bar to see role-scoped cards.</div>
+
+      <div class="title-row">
+        <div><p class="kicker">Operations dashboard</p><h1>Home</h1><p class="lede">What needs your attention, what you did recently, and where work is accumulating.</p></div>
+        <a class="command" href="02-lifecycle.html#intake">+ INTAKE LOT</a>
+      </div>
+
+      <section class="panel filter-bar" aria-label="Dashboard scope">
+        <label>Period
+          <div class="segmented" role="group" aria-label="Date preset"><button type="button">Today</button><button type="button" class="active">Last 7 days</button><button type="button">Last 30 days</button><button type="button">Custom…</button></div>
+        </label>
+        <label data-roles="auditor platform_admin">Scope
+          <div class="segmented" role="group" aria-label="Owner scope"><button type="button" class="active">Mine</button><button type="button">All permitted users</button><button type="button">Specific user…</button></div>
+        </label>
+        <label data-roles="dq_analyst risk_analyst case_manager" class="muted">Scope <span style="font:13px var(--sans);color:var(--ink);text-transform:none">My work (default for Analyst / Reviewer)</span></label>
+        <div class="actions"><span class="chip url">URL: ?period=7d&amp;scope=me</span></div>
+      </section>
+
+      <p class="kicker" style="margin-top:22px">Needs attention</p>
+      <div class="attention-grid">
+        <a class="attention-card urgent" href="04-runs.html?status=failed&scope=me" data-roles="dq_analyst risk_analyst platform_admin auditor">
+          <p class="kicker">My failed runs</p><span class="count">1</span>
+          <p>check_completeness failed on <b>demo-20260821-01</b> (Canonical) — source timeout. Retry or inspect.</p>
+          <span class="cta">OPEN FAILED RUNS →</span>
+        </a>
+        <a class="attention-card" href="04-runs.html?status=active&scope=me" data-roles="dq_analyst risk_analyst platform_admin auditor">
+          <p class="kicker">My active runs</p><span class="count">2</span>
+          <p>1 running (risk assessment on FY2024-Q2-batch-02) · 1 queued (resolve entity).</p>
+          <span class="cta">MONITOR →</span>
+        </a>
+        <a class="attention-card waiting" href="02-lifecycle.html?zone=canonical&awaiting=dq_gate" data-roles="dq_analyst platform_admin auditor">
+          <p class="kicker">Awaiting DQ gate</p><span class="count">1</span>
+          <p>Canonical snapshots with a completed DQ run but no gate evaluation yet.</p>
+          <span class="cta">EVALUATE GATE →</span>
+        </a>
+        <a class="attention-card waiting" href="02-lifecycle.html?zone=dq_passed" data-roles="dq_analyst platform_admin auditor">
+          <p class="kicker">Awaiting enrichment / publication</p><span class="count">1</span>
+          <p><b>FY2024-Q3-batch-03</b> is DQ-passed. Enrich it, or publish unchanged to reach Risk ready.</p>
+          <span class="cta">ENRICH &amp; PUBLISH →</span>
+        </a>
+        <a class="attention-card ready" href="05-cases.html#evidence" data-roles="risk_analyst case_manager platform_admin auditor">
+          <p class="kicker">Risk runs awaiting evidence-set approval</p><span class="count">0</span>
+          <p>No draft risk evidence sets are waiting. Last approval: Q2 risk evidence, 5 Nov.</p>
+          <span class="cta">CASE WORKBENCH →</span>
+        </a>
+        <a class="attention-card ready" href="05-cases.html#review" data-roles="case_manager platform_admin auditor">
+          <p class="kicker">Candidate batches awaiting decisions</p><span class="count">1</span>
+          <p>Batch <b>FY2024-Q2</b>: 5 of 12 candidates undecided. Finalisation blocked until all are decided.</p>
+          <span class="cta">REVIEW CANDIDATES →</span>
+        </a>
+      </div>
+
+      <div class="home-grid" style="margin-top:26px">
+        <section class="panel">
+          <div class="panel-head"><div><p class="kicker">Recent activity</p><h2>My last actions</h2></div><a class="text-button" href="04-runs.html?scope=me">VIEW RUN HISTORY →</a></div>
+          <div class="filter-bar" style="margin-bottom:12px">
+            <label>Activity type<select><option>All types</option><option>Lot intake</option><option>Dataset publication</option><option>Function run</option><option>Evidence-set approval</option><option>Human decision</option><option>Report generation</option></select></label>
+            <label>Status<select><option>Any</option><option>Completed</option><option>Failed</option><option>Running / queued</option></select></label>
+            <label style="min-width:auto"><span style="font:13px var(--sans);color:var(--ink);text-transform:none;display:flex;gap:6px;align-items:center;padding-top:14px"><input type="checkbox" style="width:auto"> Requires action only</span></label>
+          </div>
+          <div class="compact-list">
+            <div class="compact-row"><span class="status failed">Failed</span><span data-ids="f00dbeef-9c1a-4a3e-8f52-6d2b1c7e9a44" data-kind="run"></span><small>Data quality · check_completeness · demo-20260821-01 · 15:41 today</small><a class="text-button" href="04-runs.html#f00dbeef">INSPECT →</a></div>
+            <div class="compact-row"><span class="status running">Running</span><span data-ids="5e5e5e5e-1b2c-4d3e-9f80-aa11bb22cc33" data-kind="run"></span><small>Risk assessment · 2 functions · FY2024-Q2-batch-02 (Risk ready) · 15:12 today</small><a class="text-button" href="04-runs.html#5e5e5e5e">MONITOR →</a></div>
+            <div class="compact-row"><span class="status published">Published</span><span data-ids="d0f3a9b2-7e6c-4c1d-b8a5-2f4e9d1c0b77" data-kind="dataset"></span><small>Dataset publication · Canonical → DQ passed · FY2024-Q3-batch-03 · 11:02 today</small><a class="text-button" href="03-workspace.html">OPEN →</a></div>
+            <div class="compact-row"><span class="status completed">Completed</span><span data-ids="ab12cd34-5e6f-4a7b-8c9d-0e1f2a3b4c5d" data-kind="run"></span><small>Data quality · 4 functions · 2 warnings · FY2024-Q3-batch-03 (Canonical) · 09:48 today</small><a class="text-button" href="04-runs.html#ab12cd34">INSPECT →</a></div>
+            <div class="compact-row"><span class="status active">Lot</span><span data-ids="7c2e9f41-5b8a-4d2e-9a7f-3c1d8e6b2a90" data-kind="lot"></span><small>Lot intake · FY2024-Q3-batch-03 · 12 reports · Landing + Canonical created · 09:12 today</small><a class="text-button" href="02-lifecycle.html">OPEN →</a></div>
+            <div class="compact-row"><span class="status completed">Completed</span><span data-ids="77aa33bb-cc44-4dd5-9ee6-ff7700881199" data-kind="run"></span><small>Risk assessment · profit/presence mismatch, ETR outlier · 9 results · yesterday 17:30</small><a class="text-button" href="04-runs.html#77aa33bb">INSPECT →</a></div>
+          </div>
+          <div class="pager"><span>Newest first · showing 6 of 41 in period</span><button class="secondary">VIEW MORE</button></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-head"><div><p class="kicker">Where work is accumulating</p><h2>Pipeline at a glance</h2></div></div>
+          <h3 style="margin:6px 0 8px;font-size:13px">Lots by current stage <span class="help" title="The furthest immutable snapshot each lot has reached. Click a bar to open those lots.">i</span></h3>
+          <div class="bar-report">
+            <a class="bar" href="02-lifecycle.html?zone=canonical"><span>Canonical</span><i style="width:33%"></i><span>1</span></a>
+            <a class="bar" href="02-lifecycle.html?zone=dq_passed"><span>DQ passed</span><i class="ok" style="width:33%"></i><span>1</span></a>
+            <a class="bar" href="02-lifecycle.html?zone=enriched"><span>Enriched</span><i class="warn" style="width:0%"></i><span>0</span></a>
+            <a class="bar" href="02-lifecycle.html?zone=risk_ready"><span>Risk ready</span><i style="width:33%;background:#62476d"></i><span>1</span></a>
+            <a class="bar" href="06-reports.html"><span>Final case set</span><i class="muted" style="width:33%"></i><span>1</span></a>
+          </div>
+          <h3 style="margin:18px 0 8px;font-size:13px">Runs by status · last 30 days</h3>
+          <div class="bar-report">
+            <a class="bar" href="04-runs.html?status=completed"><span>Completed</span><i class="ok" style="width:82%"></i><span>14</span></a>
+            <a class="bar" href="04-runs.html?status=failed"><span>Failed</span><i class="bad" style="width:6%"></i><span>1</span></a>
+            <a class="bar" href="04-runs.html?status=running"><span>Running</span><i class="warn" style="width:6%"></i><span>1</span></a>
+            <a class="bar" href="04-runs.html?status=queued"><span>Queued</span><i class="warn" style="width:6%"></i><span>1</span></a>
+          </div>
+          <h3 style="margin:18px 0 8px;font-size:13px">Median time between stages <span class="help" title="Computed server-side from promotion timestamps for lots in the selected period.">i</span></h3>
+          <dl class="kv">
+            <dt>Canonical → DQ passed</dt><dd>1.8 days</dd>
+            <dt>DQ passed → Risk ready</dt><dd>0.6 days</dd>
+            <dt>Risk ready → Final case set</dt><dd>6.2 days</dd>
+            <dt>DQ gate: eligible / rejected</dt><dd>58 / 4 reports</dd>
+          </dl>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="mock.js"></script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Settings · CbCR Workbench (mockup)</title>
+  <link rel="stylesheet" href="base-niche.css">
+  <link rel="stylesheet" href="base-wip.css">
+  <link rel="stylesheet" href="base-reports.css">
+  <link rel="stylesheet" href="redesign.css">
+</head>
+<body class="wip" data-page="settings" data-default-persona="admin">
+  <header class="masthead" id="masthead"></header>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="Application navigation"></aside>
+    <main>
+      <div class="mock-note"><b>Mockup 08 · Settings</b> (brief §7.11; replaces "Administration"). Reached from the profile menu or the sidebar Utilities block, only for <code>platform_admin</code>. Five sections; user creation and role assignment use the existing <code>POST /users</code> and <code>PUT /users/{id}/roles</code> APIs that the current UI never exposed. No <code>window.prompt</code>.</div>
+
+      <div class="title-row">
+        <div><p class="kicker">Configuration boundary</p><h1>Settings</h1><p class="lede">Users, data sources, pipeline profiles, function configuration and system status — behind permission-controlled APIs.</p></div>
+      </div>
+
+      <div class="settings-layout">
+        <nav class="sub-nav" aria-label="Settings sections">
+          <a href="#users" data-section="users" class="active">Users and access</a>
+          <a href="#sources" data-section="sources">Data sources</a>
+          <a href="#profiles" data-section="profiles">Pipeline profiles</a>
+          <a href="#functions" data-section="functions">Functions and mappings</a>
+          <a href="#system" data-section="system">System status</a>
+          <div class="nav-section">Developer</div>
+          <a href="#advanced">Advanced operations</a>
+          <a href="#swagger">API documentation ↗</a>
+        </nav>
+
+        <div>
+          <!-- Users -->
+          <section class="settings-section active" id="users">
+            <section class="panel">
+              <div class="panel-head"><div><p class="kicker">Users and access</p><h2>Users and roles</h2></div><button class="command" data-dialog="userDialog">+ CREATE USER</button></div>
+              <div class="callout warn"><strong>Test users detected</strong>2 users created by acceptance tests (<code>acceptance-…</code>) exist in this database. They should live in a separate test database. <button class="text-button" data-toast="Deactivated 2 acceptance-test users.">DEACTIVATE BOTH</button></div>
+              <div class="filter-bar" style="margin-bottom:12px"><label class="grow">Find<input placeholder="User ID or display name"></label><label>Role<select><option>Any</option><option>platform_admin</option><option>dq_analyst</option><option>risk_analyst</option><option>case_manager</option><option>auditor</option></select></label><label>Status<select><option>Active</option><option>Inactive</option><option>All</option></select></label></div>
+              <div class="table-wrap"><table class="data-table">
+                <thead><tr><th></th><th>User</th><th>Display name</th><th>Roles</th><th>Persona shown</th><th>Status</th><th>Last active</th></tr></thead>
+                <tbody>
+                  <tr class="summary open"><td><button class="chevron">›</button></td><td><code>a.sharma</code></td><td>A. Sharma</td><td><div class="role-pills"><span class="status">dq_analyst</span><span class="status">risk_analyst</span></div></td><td>Analyst</td><td><span class="status active">Active</span></td><td>Today 15:58</td></tr>
+                  <tr class="row-detail"><td colspan="7">
+                    <div class="detail-head"><h3>a.sharma</h3><div class="row-actions"><button class="secondary" data-dialog="rolesDialog">EDIT ROLES</button><button class="secondary" data-toast="User deactivated. Existing records keep their attribution.">DEACTIVATE</button></div></div>
+                    <div class="info-grid">
+                      <div><h4 style="margin:0 0 6px">Effective permissions</h4><ul class="checklist"><li class="ok">run_function · data_quality, risk_assessment</li><li class="ok">view_results · data_quality, risk_assessment</li><li class="ok">manage_datasets · data_quality, risk_assessment</li><li class="bad">approve_risk_result_set, record_decision, finalize_batch (case_manager)</li><li class="bad">view_audit (auditor)</li><li class="bad">manage_sources, manage_users (platform_admin)</li></ul></div>
+                      <div><h4 style="margin:0 0 6px">Assignment history</h4><dl class="kv"><dt>5 Nov 2026</dt><dd>risk_analyst added by demo</dd><dt>12 Sep 2026</dt><dd>dq_analyst added by demo</dd><dt>12 Sep 2026</dt><dd>User created by demo</dd></dl></div>
+                    </div>
+                  </td></tr>
+                  <tr class="summary"><td><button class="chevron">›</button></td><td><code>r.mehta</code></td><td>R. Mehta</td><td><div class="role-pills"><span class="status">case_manager</span></div></td><td>Case Reviewer</td><td><span class="status active">Active</span></td><td>Yesterday 18:44</td></tr>
+                  <tr class="row-detail" hidden><td colspan="7"></td></tr>
+                  <tr class="summary"><td><button class="chevron">›</button></td><td><code>auditor</code></td><td>Auditor</td><td><div class="role-pills"><span class="status">auditor</span></div></td><td>Auditor</td><td><span class="status active">Active</span></td><td>5 Nov 08:30</td></tr>
+                  <tr class="row-detail" hidden><td colspan="7"></td></tr>
+                  <tr class="summary"><td><button class="chevron">›</button></td><td><code>demo</code></td><td>Demo administrator</td><td><div class="role-pills"><span class="status">platform_admin</span><span class="status">dq_analyst</span><span class="status">risk_analyst</span><span class="status">case_manager</span></div></td><td>Administrator</td><td><span class="status active">Active</span></td><td>Today 16:04</td></tr>
+                  <tr class="row-detail" hidden><td colspan="7"></td></tr>
+                  <tr class="summary" style="opacity:.6"><td><button class="chevron">›</button></td><td><code>acceptance-20261104-1</code></td><td>acceptance test</td><td><div class="role-pills"><span class="status">dq_analyst</span></div></td><td>Analyst</td><td><span class="status warning">Test data</span></td><td>4 Nov 02:11</td></tr>
+                  <tr class="row-detail" hidden><td colspan="7"></td></tr>
+                </tbody></table></div>
+              <div class="pager"><span>5 users</span></div>
+            </section>
+          </section>
+
+          <!-- Sources -->
+          <section class="settings-section" id="sources">
+            <section class="panel">
+              <div class="panel-head"><div><p class="kicker">Data sources</p><h2>Connected sources</h2></div></div>
+              <div class="table-wrap"><table class="data-table"><thead><tr><th>Source</th><th>Adapter</th><th>Endpoint reference</th><th>Secret</th><th>Last successful access</th><th>Status</th><th></th></tr></thead><tbody>
+                <tr><td><strong>Local CbCR PostgreSQL</strong><br><code>local_cbcr_postgresql</code></td><td><span class="status">postgresql_view</span></td><td><code>postgresql://cbcr_ro@db-internal:5432/cbcr_source</code></td><td><code>env:CBCR_SOURCE_PASSWORD</code> <span class="muted">(never displayed)</span></td><td>Today 15:41</td><td><span class="status active">Enabled</span></td><td><button class="secondary" data-dialog="sourceDialog">EDIT</button> <button class="secondary" data-toast="Connection test succeeded in 212 ms.">TEST</button></td></tr>
+                <tr><td><strong>Fixture alpha</strong><br><code>fixture_alpha</code></td><td><span class="status">fixture</span></td><td><code>fixtures/schema_alpha.json</code></td><td>—</td><td>21 Aug 2026</td><td><span class="status">Disabled</span></td><td><button class="secondary" data-toast="Source enabled.">ENABLE</button></td></tr>
+              </tbody></table></div>
+            </section>
+          </section>
+
+          <!-- Profiles -->
+          <section class="settings-section" id="profiles">
+            <section class="panel">
+              <div class="panel-head"><div><p class="kicker">Pipeline profiles</p><h2>Routes and storage bindings</h2></div></div>
+              <p class="muted" style="margin-top:0">Changes create a new version; existing lots keep the version they were created with.</p>
+              <div class="profile-list">
+                <article class="profile-row"><strong>Ideal separated data zones</strong><code>ideal_separated · v2 · active · default</code><span class="profile-route">landing → canonical → dq_passed → enriched → risk_ready</span><button class="secondary" data-toast="Validation passed: every zone has a storage binding.">VALIDATE</button><button class="secondary">NEW VERSION</button></article>
+                <article class="profile-row"><strong>DQ-passed and enrichment combined</strong><code>combined_enrichment · v1 · active</code><span class="profile-route">landing → canonical → dq_passed → risk_ready</span><button class="secondary">VALIDATE</button><button class="secondary">NEW VERSION</button></article>
+                <article class="profile-row"><strong>Trusted source with upstream DQ evidence</strong><code>trusted_prevalidated · v1 · inactive</code><span class="profile-route">landing → canonical → enriched → risk_ready</span><button class="secondary">ACTIVATE</button></article>
+              </div>
+            </section>
+          </section>
+
+          <!-- Functions -->
+          <section class="settings-section" id="functions">
+            <section class="panel">
+              <div class="panel-head"><div><p class="kicker">Functions and mappings</p><h2>Function configuration</h2></div><a class="secondary" href="09-function-reference.html">OPEN READ-ONLY REFERENCE</a></div>
+              <div class="filter-bar" style="margin-bottom:12px"><label class="grow">Find<input placeholder="Name or code"></label><label>Stage<select><option>Any</option><option>01</option><option>02</option><option>03</option><option>04</option><option>05</option><option>06</option><option>07</option></select></label><label>Purpose<select><option>Any</option><option>data_quality</option><option>risk_assessment</option><option>case_review</option></select></label><label>Lifecycle<select><option>Active</option><option>Draft</option><option>Retired</option><option>All</option></select></label></div>
+              <div class="table-wrap"><table class="data-table"><thead><tr><th>Function</th><th>Stage</th><th>Purpose</th><th>Version</th><th>Lifecycle</th><th>Parameters</th><th></th></tr></thead><tbody>
+                <tr><td><strong>Check completeness</strong><br><code>check_completeness</code></td><td>04</td><td>data_quality</td><td>v1</td><td><span class="status active">Active</span></td><td>required_fields</td><td><button class="secondary">SCHEMA</button> <button class="secondary">NEW VERSION</button></td></tr>
+                <tr><td><strong>Score risk components</strong><br><code>score_risk_components</code></td><td>06</td><td>risk_assessment</td><td>v2</td><td><span class="status active">Active</span></td><td>weights, score_floor</td><td><button class="secondary">SCHEMA</button> <button class="secondary">RETIRE</button></td></tr>
+                <tr><td><strong>Score risk components</strong><br><code>score_risk_components</code></td><td>06</td><td>risk_assessment</td><td>v3</td><td><span class="status pending">Draft</span></td><td>weights, score_floor, jurisdiction_overrides</td><td><button class="secondary">SCHEMA</button> <button class="command" data-toast="v3 activated; v2 retired. Runs already queued keep v2.">ACTIVATE</button></td></tr>
+                <tr><td colspan="7" class="muted">… 14 more functions · mappings (alpha_v1, beta_v1, local_pg_v1) and the canonical data dictionary are listed below this table</td></tr>
+              </tbody></table></div>
+            </section>
+          </section>
+
+          <!-- System -->
+          <section class="settings-section" id="system">
+            <section class="panel">
+              <div class="panel-head"><div><p class="kicker">System status</p><h2>Backend and workers</h2></div><span class="status-dot" style="color:var(--ink);border-color:var(--line)">Nominal</span></div>
+              <div class="health-panel" style="margin:0 0 14px"><div class="health-cell"><span>Backend</span><strong>postgresql</strong></div><div class="health-cell"><span>Database</span><strong>cbcr · 18.1 GB</strong></div><div class="health-cell"><span>Application user</span><strong>cbcr_app</strong></div><div class="health-cell"><span>Async workers</span><strong>2 active · queue depth 1</strong></div></div>
+              <dl class="kv"><dt>Migrations</dt><dd>0009_audit_indexes applied 2 Nov 2026 · no pending migrations</dd><dt>Oldest queued run</dt><dd>6a7b8c9d… · 3 min</dd><dt>Failed runs (24 h)</dt><dd>1 · <a href="04-runs.html?status=failed&scope=all">view</a></dd><dt>Swagger</dt><dd><a href="#swagger">/docs</a></dd></dl>
+            </section>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <dialog id="userDialog">
+    <form method="dialog">
+      <div class="dialog-head"><div><p class="kicker">Users and access</p><h2>Create user</h2></div><button value="cancel" class="icon-button" aria-label="Close">×</button></div>
+      <div class="inline-fields"><label>User ID<input placeholder="e.g. p.iyer"></label><label>Display name<input placeholder="P. Iyer"></label></div>
+      <div class="field"><span>Roles (one or more)</span><div class="radio-stack"><label><input type="checkbox"><span>dq_analyst<small>Run DQ functions, see DQ results, manage DQ datasets</small></span></label><label><input type="checkbox"><span>risk_analyst<small>Run risk functions, see risk results, manage risk datasets</small></span></label><label><input type="checkbox"><span>case_manager<small>Approve evidence sets, record decisions, finalise case sets</small></span></label><label><input type="checkbox"><span>auditor<small>Read-only oversight: lineage and access/action audit</small></span></label><label><input type="checkbox"><span>platform_admin<small>Users, sources, profiles, function configuration</small></span></label></div></div>
+      <div class="dialog-actions"><button value="cancel" class="secondary">CANCEL</button><button class="command" data-toast="User created. They can sign in with the organisation identity provider.">CREATE USER</button></div>
+    </form>
+  </dialog>
+  <dialog id="rolesDialog">
+    <form method="dialog">
+      <div class="dialog-head"><div><p class="kicker">a.sharma</p><h2>Edit roles</h2></div><button value="cancel" class="icon-button" aria-label="Close">×</button></div>
+      <div class="radio-stack"><label class="selected"><input type="checkbox" checked><span>dq_analyst</span></label><label class="selected"><input type="checkbox" checked><span>risk_analyst</span></label><label><input type="checkbox"><span>case_manager</span></label><label><input type="checkbox"><span>auditor</span></label><label><input type="checkbox"><span>platform_admin</span></label></div>
+      <label>Reason (recorded in assignment history)<input placeholder="Optional"></label>
+      <div class="dialog-actions"><button value="cancel" class="secondary">CANCEL</button><button class="command" data-toast="Roles saved.">SAVE ROLES</button></div>
+    </form>
+  </dialog>
+  <dialog id="sourceDialog">
+    <form method="dialog">
+      <div class="dialog-head"><div><p class="kicker">Data sources</p><h2>Edit Local CbCR PostgreSQL</h2></div><button value="cancel" class="icon-button" aria-label="Close">×</button></div>
+      <label>Endpoint reference<input value="postgresql://cbcr_ro@db-internal:5432/cbcr_source"></label>
+      <label>Secret reference <span class="help" title="Name of the environment secret holding the password. The password itself is never shown or stored here.">i</span><input value="CBCR_SOURCE_PASSWORD"></label>
+      <div class="callout" style="margin:0"><strong>Test before saving</strong>Saving a failing endpoint blocks new intake lots from this source.</div>
+      <div class="dialog-actions"><button value="cancel" class="secondary">CANCEL</button><button class="secondary" data-toast="Connection test succeeded in 212 ms.">TEST CONNECTION</button><button class="command" data-toast="Source connection updated.">SAVE</button></div>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="mock.js"></script>
+</body>
+</html>

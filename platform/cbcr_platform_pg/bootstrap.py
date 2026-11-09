@@ -67,17 +67,18 @@ def seed(db: PostgreSQLDatabase, source_endpoint: str | None = None) -> None:
         ),
     )
     roles = (
-        ("platform_admin", "Platform administrator"),
-        ("dq_analyst", "Data quality analyst"),
-        ("risk_analyst", "Risk analyst"),
-        ("case_manager", "Case manager"),
-        ("auditor", "Auditor"),
+        ("platform_admin", "Platform administrator", "Configure users, roles, sources, functions, and pipeline profiles."),
+        ("dq_analyst", "Data quality analyst", "Run data-quality functions, review findings, and publish governed DQ outputs."),
+        ("risk_analyst", "Risk analyst", "Run risk-analysis functions and review risk results on risk-ready datasets."),
+        ("case_manager", "Case manager", "Approve evidence sets, review candidates, and finalize audit handoff cases."),
+        ("auditor", "Auditor", "Read cross-user lineage, access decisions, and immutable audit evidence."),
     )
     permissions = [
         ("platform_admin", "manage_catalogue", None, None, "allow"),
         ("platform_admin", "manage_access", None, None, "allow"),
         ("platform_admin", "manage_sources", None, None, "allow"),
         ("platform_admin", "manage_pipeline_profiles", None, None, "allow"),
+        ("platform_admin", "view_audit", None, None, "allow"),
         ("dq_analyst", "run_function", "*", "data_quality", "allow"),
         ("risk_analyst", "run_function", "*", "risk_assessment", "allow"),
         ("case_manager", "run_function", "07", "case_review", "allow"),
@@ -89,7 +90,7 @@ def seed(db: PostgreSQLDatabase, source_endpoint: str | None = None) -> None:
         ("risk_analyst", "manage_datasets", "*", "risk_assessment", "allow"),
         ("case_manager", "manage_selection", "07", "case_review", "allow"),
     ]
-    for role_id, _ in roles:
+    for role_id, _, _ in roles:
         permissions.extend(
             [
                 (role_id, "view_catalogue", None, None, "allow"),
@@ -153,11 +154,12 @@ def seed(db: PostgreSQLDatabase, source_endpoint: str | None = None) -> None:
                    VALUES(%s,%s,%s,%s,true,%s) ON CONFLICT(profile_id) DO NOTHING""",
                 (profile_id, name, route, bindings, now),
             )
-        for role_id, name in roles:
+        for role_id, name, description in roles:
             tx.execute(
                 """INSERT INTO cbcr_control.role(role_id,name,description,active,created_at)
-                   VALUES(%s,%s,NULL,true,%s) ON CONFLICT(role_id) DO NOTHING""",
-                (role_id, name, now),
+                   VALUES(%s,%s,%s,true,%s) ON CONFLICT(role_id) DO UPDATE SET
+                     name=excluded.name,description=excluded.description,active=true""",
+                (role_id, name, description, now),
             )
         for user_id, display_name in (("demo", "Demo multi-role user"), ("auditor", "Demo auditor")):
             tx.execute(

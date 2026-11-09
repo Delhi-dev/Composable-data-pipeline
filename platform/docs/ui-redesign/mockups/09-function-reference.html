@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Function reference · CbCR Workbench (mockup)</title>
+  <link rel="stylesheet" href="base-niche.css">
+  <link rel="stylesheet" href="base-wip.css">
+  <link rel="stylesheet" href="base-reports.css">
+  <link rel="stylesheet" href="redesign.css">
+</head>
+<body class="wip" data-page="reference" data-default-persona="analyst">
+  <header class="masthead" id="masthead"></header>
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="Application navigation"></aside>
+    <main>
+      <div class="mock-note"><b>Mockup 09 · Function reference</b> (brief §7.10; replaces "Function catalogue" in primary navigation). Read-only, reached from Utilities / Help and from the "Reference ↗" link on every function card. Administrators manage activation and versions under Settings → Functions.</div>
+
+      <div class="title-row">
+        <div><p class="kicker">Help · reference</p><h1>Function reference</h1><p class="lede">What each control does, where it can run, what it needs and what it produces. You never need this page to run a normal stage — the same explanations appear beside each function.</p></div>
+        <a class="secondary" href="08-settings.html#functions" data-roles="platform_admin">MANAGE CONFIGURATION</a>
+      </div>
+
+      <section class="panel filter-bar">
+        <label class="grow">Find<input placeholder="Name, code or parameter"></label>
+        <label>Stage<select><option>Any</option><option>01 · Receipt identity</option><option>02 · Normalisation</option><option>03 · Resolution / reference</option><option>04 · Checks</option><option>05 · Risk screens</option><option>06 · Risk scoring</option><option>07 · Case review</option></select></label>
+        <label>Purpose<select><option>Any</option><option>Data quality</option><option>Risk assessment</option><option>Case review</option></select></label>
+        <label>Runs on<select><option>Any zone</option><option>Canonical</option><option>DQ passed</option><option>Enriched</option><option>Risk ready</option></select></label>
+        <label>Needs parameters<select><option>Any</option><option>Yes</option><option>No</option></select></label>
+      </section>
+
+      <div class="catalogue-grid">
+        <section class="catalogue-card"><p class="kicker">Stage 01 · Data quality</p>
+          <article class="run-card" id="validate_receipt_identity"><div class="top"><strong>Validate receipt identity</strong><code>validate_receipt_identity</code> <span class="muted">v1</span><div class="right"><span class="zone">Canonical</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Purpose</dt><dd>Checks that each canonical report carries a valid receipt business identity (message reference, reporting entity, period).</dd><dt>Inputs</dt><dd>Canonical report headers · no parameters</dd><dt>Output</dt><dd>Findings with code RECEIPT_IDENTITY_INVALID (error)</dd><dt>Example</dt><dd>A report whose reporting entity ID is blank is flagged and will be rejected at a DQ gate blocking on errors.</dd></dl></div></article>
+          <article class="run-card" id="detect_duplicate_report"><div class="top"><strong>Detect duplicate report</strong><code>detect_duplicate_report</code> <span class="muted">v1</span><div class="right"><span class="zone">Canonical</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Purpose</dt><dd>Finds reports sharing the same canonical business key.</dd><dt>Output</dt><dd>DUPLICATE_BUSINESS_KEY (error) on each duplicate</dd></dl></div></article>
+        </section>
+        <section class="catalogue-card"><p class="kicker">Stage 02 · Data quality</p>
+          <article class="run-card" id="normalize_currency"><div class="top"><strong>Normalise currency</strong><code>normalize_currency</code> <span class="muted">v1</span><div class="right"><span class="zone">Canonical</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Parameters</dt><dd><code>target_currency</code> string, default EUR</dd><dt>Output</dt><dd>Normalisation plan recorded in the run summary; findings for unknown currencies</dd></dl></div></article>
+          <article class="run-card" id="standardize_identifiers"><div class="top"><strong>Standardise identifiers</strong><code>standardize_identifiers</code> <span class="muted">v1</span><div class="right"><span class="zone">Canonical</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Output</dt><dd>Findings for identifiers that cannot be standardised</dd></dl></div></article>
+        </section>
+        <section class="catalogue-card"><p class="kicker">Stage 03 · Data quality</p>
+          <article class="run-card" id="resolve_entity"><div class="top"><strong>Resolve entity</strong><code>resolve_entity</code> <span class="muted">v1</span><div class="right"><span class="zone">Canonical · DQ passed · Enriched</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body"><dl class="kv"><dt>Purpose</dt><dd>Matches each constituent entity to the domestic entity register using identifiers and name similarity.</dd><dt>Parameters</dt><dd><code>match_confidence_floor</code> number 0–1, default 0.85 — entities below the floor are reported as unresolved</dd><dt>Output</dt><dd>Resolved entity references in the run summary; ENTITY_UNRESOLVED (warning) findings</dd><dt>Typical use</dt><dd>Run on the DQ-passed snapshot before enrichment so that enrichment facts can be attached to resolved entities.</dd></dl></div></article>
+          <article class="run-card" id="enrich_jurisdiction_reference"><div class="top"><strong>Enrich jurisdiction reference</strong><code>enrich_jurisdiction_reference</code> <span class="muted">v1</span><div class="right"><span class="zone">Canonical · DQ passed · Enriched</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Output</dt><dd>Jurisdiction reference attributes; JURISDICTION_UNKNOWN (warning) for unknown codes</dd></dl></div></article>
+        </section>
+        <section class="catalogue-card"><p class="kicker">Stage 04 · Data quality</p>
+          <article class="run-card" id="check_completeness"><div class="top"><strong>Check completeness</strong><code>check_completeness</code> <span class="muted">v1</span><div class="right"><span class="zone">Canonical · DQ passed · Enriched</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Parameters</dt><dd><code>required_fields</code> list, default revenue_unrelated, revenue_related, profit_before_tax, tax_paid, employees</dd><dt>Output</dt><dd>COMPLETENESS_MISSING_&lt;FIELD&gt; (error) per report</dd></dl></div></article>
+          <article class="run-card" id="check_rpt_share_threshold"><div class="top"><strong>Check related revenue share</strong><code>check_rpt_share_threshold</code> <span class="muted">v1</span><div class="right"><span class="zone">Canonical · DQ passed · Enriched</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Parameters</dt><dd><code>threshold</code> share 0–1, default 0.5</dd><dt>Output</dt><dd>RPT_SHARE_ABOVE_THRESHOLD (warning) per entity</dd></dl></div></article>
+        </section>
+        <section class="catalogue-card"><p class="kicker">Stage 05 · Risk assessment</p>
+          <article class="run-card" id="analyze_profit_presence_mismatch"><div class="top"><strong>Profit / presence mismatch</strong><code>analyze_profit_presence_mismatch</code> <span class="muted">v1</span><div class="right"><span class="zone">Risk ready</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Purpose</dt><dd>Screens for entities reporting high profit with little economic presence (employees, tangible assets).</dd><dt>Parameters</dt><dd><code>employee_floor</code> default 10 · <code>profit_margin_cap</code> default 0.35</dd><dt>Output</dt><dd>Risk results PROFIT_PRESENCE_MISMATCH with severity and score</dd></dl></div></article>
+          <article class="run-card" id="analyze_etr_outlier"><div class="top"><strong>Effective tax rate outlier</strong><code>analyze_etr_outlier</code> <span class="muted">v1</span><div class="right"><span class="zone">Risk ready</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Parameters</dt><dd><code>etr_floor</code> default 0.05</dd><dt>Output</dt><dd>ETR_OUTLIER_LOW risk results</dd></dl></div></article>
+        </section>
+        <section class="catalogue-card"><p class="kicker">Stage 06 · Risk assessment</p>
+          <article class="run-card" id="cross_match_domestic_turnover"><div class="top"><strong>Cross-match domestic turnover</strong><code>cross_match_domestic_turnover</code> <span class="muted">v1</span><div class="right"><span class="zone">Risk ready</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Purpose</dt><dd>Compares CbCR revenue for domestic entities with domestic turnover data.</dd></dl></div></article>
+          <article class="run-card" id="score_risk_components"><div class="top"><strong>Score risk components</strong><code>score_risk_components</code> <span class="muted">v2</span><div class="right"><span class="zone">Risk ready</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Parameters</dt><dd><code>weights</code> map · <code>score_floor</code> default 0.3</dd><dt>Output</dt><dd>Composite score per report / entity</dd></dl></div></article>
+          <article class="run-card" id="load_domestic_risk_context"><div class="top"><strong>Load domestic context for screened reports</strong><code>load_domestic_risk_context</code> <span class="muted">v1</span><div class="right"><span class="zone">Risk ready</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Parameters</dt><dd><code>screening_run_id</code> · <code>fiscal_year</code> default 2025 · <code>match_confidence_floor</code> default 0.85</dd><dt>Output</dt><dd>Immutable reusable domestic context (ID) for the two functions below</dd></dl></div></article>
+          <article class="run-card" id="analyze_outbound_low_substance_payments"><div class="top"><strong>Outbound payments to low-substance jurisdictions</strong><code>analyze_outbound_low_substance_payments</code> <span class="muted">v1</span><div class="right"><span class="zone">Risk ready</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Parameters</dt><dd><code>domestic_context_id</code> · <code>min_payment_amount</code> 1,000,000 · <code>low_tax_etr_threshold</code> 0.1 · <code>substance_employee_threshold</code> 15</dd></dl></div></article>
+          <article class="run-card" id="analyze_interest_stripping"><div class="top"><strong>Interest stripping and thin capitalisation</strong><code>analyze_interest_stripping</code> <span class="muted">v1</span><div class="right"><span class="zone">Risk ready</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Parameters</dt><dd><code>interest_ebitda_cap</code> 0.3 · <code>debt_equity_cap</code> 2.0 · <code>min_interest_amount</code> 1,000,000 · <code>low_tax_etr_threshold</code> 0.1</dd></dl></div></article>
+        </section>
+        <section class="catalogue-card"><p class="kicker">Stage 07 · Case review</p>
+          <article class="run-card" id="generate_case_candidates"><div class="top"><strong>Generate case candidates</strong><code>generate_case_candidates</code> <span class="muted">v1</span><div class="right"><span class="zone">Risk ready</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body"><dl class="kv"><dt>Purpose</dt><dd>Creates a selection batch of candidates from an <b>approved</b> risk evidence set.</dd><dt>Parameters</dt><dd><code>risk_result_set_id</code> — supplied automatically by the Case workbench · <code>min_score</code> · <code>max_candidates</code></dd><dt>Output</dt><dd>One selection batch with candidate rows carrying their source risk evidence</dd><dt>Note</dt><dd>Run it from Case workbench → Generate candidates rather than from Run functions.</dd></dl></div></article>
+          <article class="run-card" id="create_selection_report"><div class="top"><strong>Create selection report</strong><code>create_selection_report</code> <span class="muted">v1</span><div class="right"><span class="zone">Risk ready</span><button class="chevron" data-toggle="next">›</button></div></div><div class="body" hidden><dl class="kv"><dt>Output</dt><dd>Summary report of a selection batch (legacy; superseded by Reports)</dd></dl></div></article>
+        </section>
+      </div>
+    </main>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <script src="mock.js"></script>
+</body>
+</html>
